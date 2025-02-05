@@ -10,6 +10,15 @@ from bec_lib.redis_connector import RedisConnector
 from bec_lib.service_config import ServiceConfig
 
 
+@pytest.fixture
+def bec_ipython_shell(bec_client_mock):
+    with mock.patch("IPython.core.history.HistoryManager.enabled", False):
+        shell = IPython.terminal.interactiveshell.TerminalInteractiveShell.instance()
+        shell.user_ns["dev"] = bec_client_mock.device_manager.devices
+        completer = IPython.get_ipython().Completer
+        yield shell, completer
+
+
 def test_bec_entry_point_globals_and_post_startup(tmpdir):  # , capfd):
     file_to_execute = tmpdir / "post_startup.py"
     with open(file_to_execute, "w") as f:
@@ -87,27 +96,26 @@ finally:
     assert "mvr" in output
 
 
-def test_ipython_device_completion(bec_client_mock):
-    client = bec_client_mock
-    # disable history saving (which runs in a separate thread)
-    with mock.patch("IPython.core.history.HistoryManager.enabled", False):
-        shell = IPython.terminal.interactiveshell.TerminalInteractiveShell.instance()
-        shell.user_ns["dev"] = client.device_manager.devices
-        completer = IPython.get_ipython().Completer
-        assert "dev.samx" in completer.all_completions("dev.sa")
-        assert len(completer.all_completions("dev.sa")) == 3
+def test_ipython_device_completion(bec_ipython_shell):
+    _, completer = bec_ipython_shell
+    assert "dev.samx" in completer.all_completions("dev.sa")
+    assert len(completer.all_completions("dev.sa")) == 3
 
 
-def test_ipython_device_completion_property_access(bec_client_mock):
-    client = bec_client_mock
-    # disable history saving (which runs in a separate thread)
-    with mock.patch("IPython.core.history.HistoryManager.enabled", False):
-        shell = IPython.terminal.interactiveshell.TerminalInteractiveShell.instance()
-        shell.user_ns["dev"] = client.device_manager.devices
-        completer = IPython.get_ipython().Completer
-        assert "dev.rt_controller.dummy_controller.some_var" in completer.all_completions(
-            "dev.rt_controller.dummy_controller.som"
-        )
+def test_ipython_device_completion_property_access(bec_ipython_shell):
+    _, completer = bec_ipython_shell
+    assert "dev.rt_controller.dummy_controller.some_var" in completer.all_completions(
+        "dev.rt_controller.dummy_controller.som"
+    )
+
+
+def test_ipython_device_helper_func_inspect(bec_ipython_shell):
+    """
+    Test that the docstring of the helper function is displayed in the ipython client. This
+    needs to be tested as we are overwriting the default getattr method of the device container
+    """
+    shell, _ = bec_ipython_shell
+    shell.run_cell("dev.get_devices_with_tags?")
 
 
 @pytest.fixture
