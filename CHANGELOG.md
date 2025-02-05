@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.10.2 (2025-02-05)
+
+### Bug Fixes
+
+- Allow None as default schema
+  ([`cd6aa1e`](https://gitlab.psi.ch/bec/bec/-/commit/cd6aa1ed117ffcef00585bb92ef9ab90a3bf931a))
+
+
 ## v3.10.1 (2025-02-04)
 
 ### Bug Fixes
