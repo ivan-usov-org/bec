@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import rich
 from IPython.core.magic import Magics, line_magic, magics_class
+
+from bec_lib.metadata_schema import get_metadata_schema_for_scan
 
 if TYPE_CHECKING:
     from bec_ipython_client import BECIPythonClient
@@ -58,3 +61,12 @@ class BECMagics(Magics):
     def halt(self, line):
         "Request a scan halt, i.e. abort without cleanup."
         return self.client.queue.request_scan_halt()
+
+    @line_magic
+    def schema(self, line):
+        "print the metadata schema for a given scan"
+        scans = self.shell.user_ns["scans"]
+        if not hasattr(scans, line):
+            print(f"Scan {line} does not exist.")
+        else:
+            rich.print_json(data=get_metadata_schema_for_scan(line).model_json_schema())
