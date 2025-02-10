@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v3.10.3 (2025-02-10)
+
+### Bug Fixes
+
+- **ipython**: Fixed a bug that caused ipython to raise for custom helper functions within the
+  device container
+  ([`8087ec1`](https://gitlab.psi.ch/bec/bec/-/commit/8087ec15861da9015ad95c3e46eab89ea0b0ac6c))
+
+
 ## v3.10.2 (2025-02-05)
 
 ### Bug Fixes
