@@ -13,9 +13,9 @@ _METADATA_SCHEMA_REGISTRY = {}
 
 
 class BasicScanMetadata(BaseModel):
-    """Scan metadata base class which behaves like a dict, and will accept any keys,
-    like the existing metadata field in messages, but can be extended to add required
-    fields for specific scans."""
+    """Basic scan metadata class. Only requires a sample name. Accepts any additional
+    metadata that the user wishes to provide. Can be extended to add required fields
+    for specific scans."""
 
     model_config = ConfigDict(extra="allow", validate_assignment=True)
     sample_name: str = Field(

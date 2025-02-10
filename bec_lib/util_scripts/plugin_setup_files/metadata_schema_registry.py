@@ -1,4 +1,4 @@
-# from .schema_template import ExampleSchema
+# from .metadata_schema_template import ExampleSchema
 
 METADATA_SCHEMA_REGISTRY = {
     # Add models which should be used to validate scan metadata here.
