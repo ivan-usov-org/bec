@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import cache
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from bec_lib import plugin_helper
 from bec_lib.logger import bec_logger
@@ -18,6 +18,9 @@ class BasicScanMetadata(BaseModel):
     fields for specific scans."""
 
     model_config = ConfigDict(extra="allow", validate_assignment=True)
+    sample_name: str = Field(
+        "", title="Sample name", description="A human-friendly identifier for the sample"
+    )
 
 
 _DEFAULT_SCHEMA = BasicScanMetadata
