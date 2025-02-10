@@ -33,7 +33,7 @@ samx_data = s.scan.live_data.samx.samx.val
 gauss_bpm_data = s.scan.live_data.gauss_bpm.gauss_bpm.val 
 # or s.scan.live_data['gauss_bpm']['gauss_bpm'].val
 ```
-If our gui framework is running, and the default figure `fig` has not been close, you may now directly plot the data using:
+If our gui framework is running, and the default figure `fig` has not been closed, you may now directly plot the data using:
 ``` python
 fig.plot(gauss_bpm_data, samx_data)
 ```
