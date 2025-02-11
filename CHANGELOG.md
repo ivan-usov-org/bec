@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v3.11.0 (2025-02-11)
+
+### Bug Fixes
+
+- Add sample name as basic metadata field
+  ([`5ef347a`](https://gitlab.psi.ch/bec/bec/-/commit/5ef347a96ef6b1f2c0371c3fe5f9528299998b4b))
+
+- Docstrings in metadata schema class and template
+  ([`7efdbbf`](https://gitlab.psi.ch/bec/bec/-/commit/7efdbbf6d4e8b737bb7da5d26b5e5ba087cd4915))
+
+### Documentation
+
+- Add docs about metadata schema
+  ([`2ba5cfc`](https://gitlab.psi.ch/bec/bec/-/commit/2ba5cfcca5b6e91fb506e62bdc563e5b838da315))
+
+- Fix typo
+  ([`5cf45ae`](https://gitlab.psi.ch/bec/bec/-/commit/5cf45aecba77d3b36b956b4c39411cb00a25a3cd))
+
+### Features
+
+- Add ipython magic to print metadata for a scan
+  ([`c55eb42`](https://gitlab.psi.ch/bec/bec/-/commit/c55eb42c7a036cfadd7667784f2391ca96ec5d07))
+
+
 ## v3.10.3 (2025-02-10)
 
 ### Bug Fixes
@@ -557,7 +581,7 @@ closes #332
 - **scan_history,data_container**: Added tests; refactored to use conftest for shared fixtures
   ([`ec57e07`](https://gitlab.psi.ch/bec/bec/-/commit/ec57e077a2cfbee0e6344427302d49634c1939b2))
 
-### BREAKING CHANGES
+### Breaking Changes
 
 - **scans**: In the past, this was always set to true. Now, the default will depend on the relative
   flag. Relative scans return to start to avoid shifts for repeated scans. Absolute scans will not
