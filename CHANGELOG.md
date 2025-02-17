@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.12.0 (2025-02-17)
+
+### Features
+
+- **endpoints**: Include endpoint type in topic path
+  ([`ba394e7`](https://gitlab.psi.ch/bec/bec/-/commit/ba394e73fb05ff0a608652dea5e5c7f646820ea1))
+
+
 ## v3.11.0 (2025-02-11)
 
 ### Bug Fixes
