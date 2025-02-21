@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.lmfit_serializer import serialize_param_object
@@ -23,9 +22,11 @@ from bec_lib.utils.import_utils import lazy_import
 if TYPE_CHECKING:  # pragma: no cover
     import lmfit
 
+    from bec_lib import messages
     from bec_lib.client import BECClient
 else:
     lmfit = lazy_import("lmfit")
+    messages = lazy_import("bec_lib.messages")
 
 
 class DAPPluginObjectBase:

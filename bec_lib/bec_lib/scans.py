@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 from toolz import partition
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.bec_errors import ScanAbortion
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
@@ -24,10 +23,14 @@ from bec_lib.logger import bec_logger
 from bec_lib.scan_report import ScanReport
 from bec_lib.signature_serializer import dict_to_signature
 from bec_lib.utils import scan_to_csv
+from bec_lib.utils.import_utils import lazy_import
 
 if TYPE_CHECKING:  # pragma: no cover
+    from bec_lib import messages
     from bec_lib.client import BECClient
-    from bec_lib.connector import ConsumerConnector
+else:
+    # TODO: put back normal import when Pydantic gets faster
+    messages = lazy_import("bec_lib.messages")
 
 logger = bec_logger.logger
 
@@ -141,9 +144,9 @@ class ScanObject:
 
         return report
 
-    def _start_register(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
+    def _start_register(self, request: messages.ScanQueueMessage) -> None:
         """Start a register for the given request"""
-        register = self.client.device_manager.connector.register(
+        self.client.device_manager.connector.register(
             [
                 MessageEndpoints.device_readback(dev)
                 for dev in request.content["parameter"]["args"].keys()
@@ -151,7 +154,6 @@ class ScanObject:
             threaded=False,
             cb=(lambda msg: msg),
         )
-        return register
 
     def _send_scan_request(self, request: messages.ScanQueueMessage) -> None:
         """Send a scan request to the scan server"""

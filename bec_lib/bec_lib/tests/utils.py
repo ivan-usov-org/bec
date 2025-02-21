@@ -576,6 +576,8 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                 }
             }
         }
+    else:
+        signals = {}
     dev_info = {
         "device_name": device_name,
         "device_info": {

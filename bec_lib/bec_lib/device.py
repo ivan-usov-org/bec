@@ -21,11 +21,11 @@ from bec_lib.queue_items import QueueItem
 from bec_lib.utils.import_utils import lazy_import
 
 if TYPE_CHECKING:  # pragma: no cover
+    from bec_lib import messages
     from bec_lib.client import BECClient
     from bec_lib.redis_connector import RedisConnector
 else:
     # TODO: put back normal import when Pydantic gets faster
-    # from bec_lib import messages
     messages = lazy_import("bec_lib.messages")
 
 logger = bec_logger.logger
