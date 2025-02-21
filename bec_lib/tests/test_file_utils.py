@@ -11,6 +11,7 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import (
     DeviceConfigWriter,
     FileWriter,
+    FileWriterError,
     LogWriter,
     compile_file_components,
     get_full_path,
@@ -230,13 +231,32 @@ def test_compile_file_components():
         ),
     ],
 )
-def test_get_full_path(scan_info):
-    name = "master"
+@pytest.mark.parametrize(
+    "name, expect_error",
+    [
+        ("valid_name", False),  # Valid case
+        ("valid-name", False),  # Valid case with '-'
+        ("valid_name123", False),  # Valid case with '_'
+        ("", True),  # Empty string should raise an error
+        ("invalid name", True),  # Contains space
+        ("name$", True),  # Contains non-alphanumeric character
+        ("名前", True),  # Non-ASCII characters
+        ("1234", False),  # Numeric values are allowed
+        ("_hidden", False),  # Leading underscore is allowed
+        ("-dashprefix", False),  # Leading dash is allowed
+    ],
+)
+def test_get_full_path(scan_info, name, expect_error):
     file_components = scan_info.info.get("file_components")
     suffix = scan_info.scan_parameters.get("system_config").get("file_suffix")
-    if suffix is None:
-        full_path = f"{file_components[0]}_{name}.{file_components[1]}"
+
+    if expect_error:
+        with pytest.raises(FileWriterError):
+            get_full_path(scan_info, name, create_dir=False)
     else:
-        full_path = f"{file_components[0]}_{name}_{suffix}.{file_components[1]}"
-    ret = get_full_path(scan_info, name, create_dir=False)
-    assert ret == full_path
+        if suffix is None:
+            full_path = f"{file_components[0]}_{name}.{file_components[1]}"
+        else:
+            full_path = f"{file_components[0]}_{name}_{suffix}.{file_components[1]}"
+        ret = get_full_path(scan_info, name, create_dir=False)
+        assert ret == full_path
