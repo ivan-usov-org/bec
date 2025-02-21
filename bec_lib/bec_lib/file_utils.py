@@ -137,7 +137,7 @@ def compile_file_components(
         file_directory (str, optional): File directory. Defaults to None.
 
     Returns:
-        tuple(str, str): Tuple with file path components (file_path, extension), i.e. ('/data/S00000-00999/S00001', 'h5')
+        tuple(str, str): Tuple with file path components (file_path_component, extension), i.e. ('/data/S00000-00999/S00001/S00001', 'h5')
     """
     file_extension = "h5"
     if file_directory is None:

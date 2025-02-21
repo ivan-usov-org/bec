@@ -424,6 +424,13 @@ class DeviceContainer(dict):
 
 @dataclass
 class ScanInfo:
+    """Dataclass to store the scan status message.
+
+    A thin wrapper is needed to store the scan status message in a mutable object.
+    Within the device_manager on the device server, the dataclass is passed to any
+    ophyd device requesting scan_info in its signature.
+    """
+
     msg: ScanStatusMessage | None = None
 
 

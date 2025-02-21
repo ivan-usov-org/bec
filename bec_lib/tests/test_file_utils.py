@@ -11,9 +11,9 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import (
     DeviceConfigWriter,
     FileWriter,
-    FileWriterError,
     LogWriter,
-    ServiceConfigParser,
+    compile_file_components,
+    get_full_path,
 )
 from bec_lib.messages import ScanStatusMessage
 from bec_lib.tests.utils import ConnectorMock
@@ -38,7 +38,8 @@ def scan_msg():
     """Scan message fixture"""
     yield ScanStatusMessage(
         scan_id="1111",
-        info={"scan_number": 5, "file_suffix": "SampleA", "file_directory": "test_dir"},
+        scan_parameters={"system_config": {"file_directory": None, "file_suffix": None}},
+        info={"scan_number": 5, "file_components": ("S00000-00999/S00005/S00005", "h5")},
         status="closed",
     )
 
@@ -134,21 +135,18 @@ def test_compile_full_filename(file_writer, scan_msg):
     with mock.patch.object(file_writer, "get_scan_msg", return_value=scan_msg):
         return_value = file_writer.compile_full_filename(suffix=suffix)
         scannr = scan_msg.info.get("scan_number")
-        suffix2 = suffix + f"_{scan_msg.info['file_suffix']}"
         expected = os.path.join(
             file_writer._base_path,
             "data",
-            scan_msg.info["file_directory"],
-            f"S{scannr:0{file_writer._leading_zeros}d}_{suffix2}.h5",
+            f"{scan_msg.info['file_components'][0]}_{suffix}.{scan_msg.info['file_components'][1]}",
         )
         assert return_value == expected
 
     # case 3
-    scan_msg.info.pop("file_suffix")
-    scan_msg.info.pop("file_directory")
+    scan_msg.scan_parameters.pop("system_config")
     with mock.patch.object(file_writer, "get_scan_msg", return_value=scan_msg):
         scannr = scan_msg.info.get("scan_number")
-        scan_dir = f"S0000-0999/S{scannr:0{file_writer._leading_zeros}d}"
+        scan_dir = f"S00000-00999/S{scannr:0{file_writer._leading_zeros}d}"
         expected = os.path.join(
             file_writer._base_path,
             "data",
@@ -158,3 +156,87 @@ def test_compile_full_filename(file_writer, scan_msg):
         with mock.patch.object(file_writer, "get_scan_directory", return_value=scan_dir):
             return_value = file_writer.compile_full_filename(suffix=suffix)
             assert return_value == expected
+
+
+def test_compile_file_components():
+    """Test compile_file_components method.
+    Case 1: test default values
+    Case 2: test with file_directory and file_suffix (file suffix will not play a role)
+    Case 3: test with file suffix, no file directory
+    """
+    basepath = "/tmp"
+    scan_nr = 10
+    file_path, extension = compile_file_components(basepath, scan_nr)
+    assert extension == "h5"
+    assert file_path == "/tmp/data/S00000-00999/S00010/S00010"
+    scan_bundle = 1000
+    leading_zeros = 5
+    file_directory = "test_dir"
+    user_suffix = "SampleA"
+    file_path, extension = compile_file_components(
+        base_path=basepath,
+        scan_nr=scan_nr,
+        scan_bundle=scan_bundle,
+        leading_zeros=leading_zeros,
+        file_directory=file_directory,
+        user_suffix=user_suffix,
+    )
+    assert extension == "h5"
+    assert file_path == "/tmp/data/test_dir/S00010"
+    file_path, extension = compile_file_components(
+        base_path=basepath,
+        scan_nr=scan_nr,
+        scan_bundle=scan_bundle,
+        leading_zeros=leading_zeros,
+        user_suffix=user_suffix,
+    )
+    assert extension == "h5"
+    assert file_path == "/tmp/data/S00000-00999/S00010_SampleA/S00010"
+
+
+@pytest.mark.parametrize(
+    "scan_info",
+    [
+        (
+            ScanStatusMessage(
+                scan_id="1111",
+                scan_parameters={"system_config": {"file_directory": None, "file_suffix": None}},
+                info={"scan_number": 5, "file_components": ("S00000-00999/S00005/S00005", "h5")},
+                status="closed",
+            )
+        ),
+        (
+            ScanStatusMessage(
+                scan_id="1111",
+                scan_parameters={
+                    "system_config": {"file_directory": "/my_dir", "file_suffix": None}
+                },
+                info={"scan_number": 5, "file_components": ("/my_dir/S00005", "h5")},
+                status="closed",
+            )
+        ),
+        (
+            ScanStatusMessage(
+                scan_id="1111",
+                scan_parameters={
+                    "system_config": {"file_directory": None, "file_suffix": "sampleA"}
+                },
+                info={
+                    "scan_number": 5,
+                    "file_components": ("S00000-00999/S00005_sampleA/S00005", "h5"),
+                },
+                status="closed",
+            )
+        ),
+    ],
+)
+def test_get_full_path(scan_info):
+    name = "master"
+    file_components = scan_info.info.get("file_components")
+    suffix = scan_info.scan_parameters.get("system_config").get("file_suffix")
+    if suffix is None:
+        full_path = f"{file_components[0]}_{name}.{file_components[1]}"
+    else:
+        full_path = f"{file_components[0]}_{name}_{suffix}.{file_components[1]}"
+    ret = get_full_path(scan_info, name, create_dir=False)
+    assert ret == full_path
