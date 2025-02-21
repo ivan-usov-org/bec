@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from _collections_abc import dict_items, dict_keys, dict_values
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib import messages
 
 

@@ -25,7 +25,7 @@ from bec_lib.scan_report import ScanReport
 from bec_lib.signature_serializer import dict_to_signature
 from bec_lib.utils import scan_to_csv
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.client import BECClient
     from bec_lib.connector import ConsumerConnector
 

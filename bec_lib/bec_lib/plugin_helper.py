@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 from bec_lib.logger import bec_logger
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.metadata_schema import BasicScanMetadata
 
 logger = bec_logger.logger

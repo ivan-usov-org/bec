@@ -18,7 +18,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler, Alarms
-from bec_lib.bec_service import BECService, BECStatus
+from bec_lib.bec_service import BECService
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler, EventType
 from bec_lib.dap_plugins import DAPPlugins
@@ -32,16 +32,21 @@ from bec_lib.service_config import ServiceConfig
 from bec_lib.user_scripts_mixin import UserScriptsMixin
 from bec_lib.utils.import_utils import lazy_import_from
 
-if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
-
 logger = bec_logger.logger
-# TODO: put back normal import when Pydantic gets faster
-VariableMessage = lazy_import_from("bec_lib.messages", ("VariableMessage",))
-BECStatus = lazy_import_from("bec_lib.messages", ("BECStatus",))
-RedisConnector = lazy_import_from("bec_lib.redis_connector", ("RedisConnector",))
-ScanManager = lazy_import_from("bec_lib.scan_manager", ("ScanManager",))
-Scans = lazy_import_from("bec_lib.scans", ("Scans",))
+
+if TYPE_CHECKING:  # pragma: no cover
+    from bec_lib.connector import ConnectorBase
+    from bec_lib.messages import BECStatus, VariableMessage
+    from bec_lib.redis_connector import RedisConnector
+    from bec_lib.scan_manager import ScanManager
+    from bec_lib.scans import Scans
+else:
+    # TODO: put back normal import when Pydantic gets faster
+    VariableMessage = lazy_import_from("bec_lib.messages", ("VariableMessage",))
+    BECStatus = lazy_import_from("bec_lib.messages", ("BECStatus",))
+    RedisConnector = lazy_import_from("bec_lib.redis_connector", ("RedisConnector",))
+    ScanManager = lazy_import_from("bec_lib.scan_manager", ("ScanManager",))
+    Scans = lazy_import_from("bec_lib.scans", ("Scans",))
 
 
 class SystemConfig(BaseModel):

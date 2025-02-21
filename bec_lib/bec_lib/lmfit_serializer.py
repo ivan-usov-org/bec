@@ -2,9 +2,14 @@
 This module contains functions for serializing and deserializing lmfit objects.
 """
 
+from typing import TYPE_CHECKING
+
 from bec_lib.utils.import_utils import lazy_import_from
 
-Parameter, Parameters = lazy_import_from("lmfit", ("Parameter", "Parameters"))
+if TYPE_CHECKING:  # pragma: no cover
+    from lmfit import Parameter, Parameters
+else:
+    Parameter, Parameters = lazy_import_from("lmfit", ("Parameter", "Parameters"))
 
 
 def serialize_param_object(param: Parameter) -> dict:

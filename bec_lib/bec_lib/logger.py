@@ -20,7 +20,7 @@ from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.utils.import_utils import lazy_import_from
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from loguru import logger as loguru_logger
 
     from bec_lib.connector import ConnectorBase

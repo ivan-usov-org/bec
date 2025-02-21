@@ -13,7 +13,7 @@ from bec_lib import messages
 from bec_lib.bec_errors import ScanAbortion
 from bec_lib.endpoints import MessageEndpoints
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.client import BECClient
     from bec_lib.queue_items import QueueItem
 

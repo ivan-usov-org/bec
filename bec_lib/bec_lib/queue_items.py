@@ -16,7 +16,7 @@ from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.utils import threadlocked
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.request_items import RequestItem
     from bec_lib.scan_items import ScanItem
     from bec_lib.scan_manager import ScanManager

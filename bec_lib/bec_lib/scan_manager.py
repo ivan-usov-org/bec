@@ -20,7 +20,7 @@ from bec_lib.scan_items import ScanStorage
 
 logger = bec_logger.logger
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.redis_connector import RedisConnector
 
 

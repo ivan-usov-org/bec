@@ -7,7 +7,6 @@ from __future__ import annotations
 import abc
 from typing import TYPE_CHECKING
 
-from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
 if TYPE_CHECKING:

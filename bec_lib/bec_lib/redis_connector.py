@@ -34,7 +34,7 @@ from bec_lib.logger import bec_logger
 from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfoMessage
 from bec_lib.serialization import MsgpackSerialization
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import Union
 
     from bec_lib.alarm_handler import Alarms

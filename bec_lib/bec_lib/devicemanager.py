@@ -23,14 +23,20 @@ from bec_lib.logger import bec_logger
 from bec_lib.utils.import_utils import lazy_import_from
 from bec_lib.utils.rpc_utils import rgetattr
 
-# TODO: put back normal import when Pydantic gets faster
-BECStatus, ServiceResponseMessage = lazy_import_from(
-    "bec_lib.messages", ("BECStatus", "ServiceResponseMessage")
-)
-
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.bec_service import BECService
-    from bec_lib.messages import DeviceConfigMessage, DeviceInfoMessage
+    from bec_lib.messages import (
+        BECStatus,
+        DeviceConfigMessage,
+        DeviceInfoMessage,
+        ServiceResponseMessage,
+    )
+else:
+    # TODO: put back normal import when Pydantic gets faster
+    BECStatus, ServiceResponseMessage = lazy_import_from(
+        "bec_lib.messages", ("BECStatus", "ServiceResponseMessage")
+    )
+
 
 logger = bec_logger.logger
 

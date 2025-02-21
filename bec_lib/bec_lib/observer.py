@@ -14,7 +14,7 @@ from typeguard import typechecked
 from bec_lib.device import Device
 from bec_lib.endpoints import MessageEndpoints
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.devicemanager import DeviceManagerBase
 
 

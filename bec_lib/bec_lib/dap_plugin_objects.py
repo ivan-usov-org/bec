@@ -20,10 +20,12 @@ from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
 from bec_lib.utils.import_utils import lazy_import
 
-lmfit = lazy_import("lmfit")
+if TYPE_CHECKING:  # pragma: no cover
+    import lmfit
 
-if TYPE_CHECKING:
     from bec_lib.client import BECClient
+else:
+    lmfit = lazy_import("lmfit")
 
 
 class DAPPluginObjectBase:

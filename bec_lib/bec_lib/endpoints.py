@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from bec_lib.utils.import_utils import lazy_import
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib import messages
 else:
     # TODO: put back normal import when Pydantic gets faster
