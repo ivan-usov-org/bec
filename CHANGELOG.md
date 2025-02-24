@@ -1,6 +1,42 @@
 # CHANGELOG
 
 
+## v3.13.0 (2025-02-24)
+
+### Features
+
+- Add status return for stage/unstage
+  ([`f8ae92a`](https://gitlab.psi.ch/bec/bec/-/commit/f8ae92a8c8e41fd7cb14b3638c19583642b39d97))
+
+### Refactoring
+
+- Add file_path to ScanStatusMessage, add ScanInfo object to device_manager
+  ([`9b57f6b`](https://gitlab.psi.ch/bec/bec/-/commit/9b57f6b06708e8a664a2a331a43344ea4164f638))
+
+- Cleanup file_utils compile_file_components and get_full_path
+  ([`55ae253`](https://gitlab.psi.ch/bec/bec/-/commit/55ae253f1675e8959cb81ee202f21d68b7f7ffbc))
+
+- Cleanup, simplify wait logic on status objects
+  ([`c293e98`](https://gitlab.psi.ch/bec/bec/-/commit/c293e986b227c5fe01aad03b0f49af1b5e9f67c1))
+
+- **bec_lib**: Cleanup of imports and type checking imports
+  ([`03daab5`](https://gitlab.psi.ch/bec/bec/-/commit/03daab54ac58a0e59c7452828a073643981f3106))
+
+- **bec_lib**: Moved import of messages to lazy import
+  ([`424a956`](https://gitlab.psi.ch/bec/bec/-/commit/424a9566c0c1e72214a62ca9eddbf9f5f4af3fd3))
+
+### Testing
+
+- Add checks for invalid names
+  ([`87e103d`](https://gitlab.psi.ch/bec/bec/-/commit/87e103d03b33b263bdf3a9b8e72324e056c9bc7d))
+
+- Add test for _stage of staged device
+  ([`e3835ce`](https://gitlab.psi.ch/bec/bec/-/commit/e3835cefd6a6a83482fa5ed175500527fb2f01c5))
+
+- Add test for compile_file_components and get_full_path
+  ([`42dedf2`](https://gitlab.psi.ch/bec/bec/-/commit/42dedf22a627261e3db6924e9fe40baaa0c0fde9))
+
+
 ## v3.12.0 (2025-02-17)
 
 ### Features
