@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.13.1 (2025-02-24)
+
+### Bug Fixes
+
+- Improve type hinting in redis and endpoints
+  ([`7d98dc7`](https://gitlab.psi.ch/bec/bec/-/commit/7d98dc70ae6e86f4d7322b2136cdd41f753479b0))
+
+### Refactoring
+
+- Tidy up validate_endpoint
+  ([`06ef7cd`](https://gitlab.psi.ch/bec/bec/-/commit/06ef7cdc399ef940d9e4d6fd873f01cd20b83f32))
+
+
 ## v3.13.0 (2025-02-24)
 
 ### Features
