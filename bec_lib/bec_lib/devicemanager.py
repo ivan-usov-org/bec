@@ -30,6 +30,7 @@ if TYPE_CHECKING:  # pragma: no cover
         BECStatus,
         DeviceConfigMessage,
         DeviceInfoMessage,
+        ScanStatusMessage,
         ServiceResponseMessage,
     )
 else:
