@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.13.2 (2025-02-25)
+
+### Bug Fixes
+
+- **devicemanager**: Fixed type hints for ScanStatusMessage
+  ([`ff84cf7`](https://gitlab.psi.ch/bec/bec/-/commit/ff84cf7cf37ae17b50e13d0bc0e8e80f59fb6799))
+
+
 ## v3.13.1 (2025-02-24)
 
 ### Bug Fixes
