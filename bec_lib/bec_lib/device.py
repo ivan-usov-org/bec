@@ -11,7 +11,7 @@ import threading
 import time
 import uuid
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 from typeguard import typechecked
 
@@ -155,10 +155,10 @@ class DeviceBase:
         self,
         *,
         name: str,
-        info: dict = None,
-        config: dict = None,
+        info: dict | None = None,
+        config: dict | None = None,
         parent=None,
-        signal_info: dict = None,
+        signal_info: dict | None = None,
     ) -> None:
         """
         Args:
@@ -184,16 +184,21 @@ class DeviceBase:
         # pylint: disable=unnecessary-lambda
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, fcn=None, cached=False, **kwargs):
+    def _run(self, *args, fcn: Callable | None = None, cached=False, **kwargs):
         device, func_call = self._get_rpc_func_name(fcn=fcn)
 
         if cached:
+            if not fcn:
+                raise ValueError("The function name must be provided to use the cached option.")
             return fcn(self, *args, **kwargs)
         return self._run_rpc_call(device, func_call, *args, **kwargs)
 
     def __getattribute__(self, name: str) -> Any:
         if name in object.__getattribute__(self, "_property_container"):
-            caller_frame = inspect.currentframe().f_back
+            tmp = inspect.currentframe()
+            if not tmp:
+                return object.__getattribute__(self, name)
+            caller_frame = tmp.f_back
             while caller_frame:
                 if "jedi" in caller_frame.f_globals:
                     # Jedi module is present, likely tab completion
@@ -897,7 +902,7 @@ class Signal(AdjustableMixin, OphydInterfaceBase):
 
 class ComputedSignal(Signal):
 
-    def set_compute_method(self, method: callable) -> None:
+    def set_compute_method(self, method: Callable) -> None:
         """Set the compute method for the ComputedSignal.
 
         We allow users to use two additional packages which are imported to simplify computations:
@@ -915,8 +920,8 @@ class ComputedSignal(Signal):
         if not callable(method):
             raise ValueError("The compute method must be callable.")
 
-        method = inspect.getsource(method)
-        self.update_config({"deviceConfig": {"compute_method": method}})
+        method_source = inspect.getsource(method)
+        self.update_config({"deviceConfig": {"compute_method": method_source}})
 
     def set_input_signals(self, *signals) -> None:
         """Set input signals for compute method.

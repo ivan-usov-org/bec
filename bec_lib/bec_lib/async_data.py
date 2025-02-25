@@ -12,14 +12,14 @@ from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
     from bec_lib import messages
-    from bec_lib.connector import ConnectorBase
+    from bec_lib.redis_connector import RedisConnector
 
 
 class AsyncDataHandler:
-    def __init__(self, connector: ConnectorBase):
+    def __init__(self, connector: RedisConnector):
         self.connector = connector
 
-    def get_async_data_for_scan(self, scan_id: str) -> dict[list]:
+    def get_async_data_for_scan(self, scan_id: str) -> dict[str, list]:
         """
         Get the async data for a given scan.
 

@@ -235,7 +235,7 @@ class Scans:
         """
 
         # check that all required keyword arguments have been specified
-        if not all(req_kwarg in kwargs for req_kwarg in scan_info.get("required_kwargs")):
+        if not all(req_kwarg in kwargs for req_kwarg in scan_info.get("required_kwargs", {})):
             raise TypeError(
                 f"{scan_info.get('doc')}\n Not all required keyword arguments have been"
                 f" specified. The required arguments are: {scan_info.get('required_kwargs')}"
