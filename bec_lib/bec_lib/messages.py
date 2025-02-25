@@ -31,7 +31,7 @@ class BECMessage(BaseModel):
     """
 
     msg_type: ClassVar[str]
-    metadata: dict = Field(default_factory=dict)
+    metadata: dict | None = Field(default_factory=dict)
 
     @field_validator("metadata")
     @classmethod
@@ -513,6 +513,8 @@ class DeviceMonitor2DMessage(BECMessage):
     data: np.ndarray
     timestamp: float = Field(default_factory=time.time)
 
+    metadata: dict | None = Field(default_factory=dict)
+
     # Needed for pydantic to accept numpy arrays
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -551,6 +553,8 @@ class DeviceMonitor1DMessage(BECMessage):
     device: str
     data: np.ndarray
     timestamp: float = Field(default_factory=time.time)
+
+    metadata: dict | None = Field(default_factory=dict)
 
     # Needed for pydantic to accept numpy arrays
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -642,7 +646,9 @@ class DeviceConfigMessage(BECMessage):
     """
 
     msg_type: ClassVar[str] = "device_config_message"
-    action: Literal["add", "set", "update", "reload", "remove"]
+    action: Literal["add", "set", "update", "reload", "remove"] = Field(
+        default=None, validate_default=True
+    )
     config: dict | None = Field(default=None)
 
     @model_validator(mode="after")
