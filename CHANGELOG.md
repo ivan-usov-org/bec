@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.15.0 (2025-02-26)
+
+### Features
+
+- **serializer**: Added basic pydantic encoding to serializer
+  ([`4804b31`](https://gitlab.psi.ch/bec/bec/-/commit/4804b3154bbb01b3510b3585338ca2dad81b92bf))
+
+
 ## v3.14.0 (2025-02-26)
 
 ### Documentation
