@@ -462,8 +462,11 @@ class DeviceBase:
                     setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
                     setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
                 else:
-                    setattr(self, user_access_name, user_access_name)
-                    self._property_container.add(user_access_name)
+                    # only update the property container if the user access name is not already in it
+                    # otherwise, we would run an RPC call instead of accessing the property
+                    if user_access_name not in self._property_container:
+                        setattr(self, user_access_name, user_access_name)
+                        self._property_container.add(user_access_name)
             else:
                 self._custom_rpc_methods[user_access_name] = DeviceBase(
                     name=user_access_name,
