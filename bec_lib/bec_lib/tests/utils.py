@@ -94,6 +94,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": device_name,
                     "kind_int": 5,
                     "kind_str": "Kind.hinted",
+                    "doc": "readback doc string",
+                    "describe": {
+                        "source": f"SIM:{device_name}",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -109,6 +116,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_setpoint",
                     "kind_int": 1,
                     "kind_str": "Kind.normal",
+                    "doc": "setpoint doc string",
+                    "describe": {
+                        "source": f"SIM:{device_name}_setpoint",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -124,6 +138,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_motor_is_moving",
                     "kind_int": 1,
                     "kind_str": "Kind.normal",
+                    "doc": "motor_is_moving doc string",
+                    "describe": {
+                        "source": f"SIM:{device_name}_motor_is_moving",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -139,6 +160,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_velocity",
                     "kind_int": 2,
                     "kind_str": "Kind.config",
+                    "doc": "velocity doc string",
+                    "describe": {
+                        "source": f"SIM:{device_name}_velocity",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -154,6 +182,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_acceleration",
                     "kind_int": 2,
                     "kind_str": "Kind.config",
+                    "doc": "acceleration doc string",
+                    "describe": {
+                        "source": f"SIM:{device_name}_acceleration",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -169,6 +204,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_high_limit_travel",
                     "kind_int": 2,
                     "kind_str": "Kind.config",
+                    "doc": "",
+                    "describe": {
+                        "source": f"SIM:{device_name}_high_limit_travel",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -184,6 +226,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_low_limit_travel",
                     "kind_int": 2,
                     "kind_str": "Kind.config",
+                    "doc": "",
+                    "describe": {
+                        "source": f"SIM:{device_name}_low_limit_travel",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -199,6 +248,13 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "obj_name": f"{device_name}_unused",
                     "kind_int": 0,
                     "kind_str": "Kind.omitted",
+                    "doc": "",
+                    "describe": {
+                        "source": f"SIM:{device_name}_unused",
+                        "dtype": "integer",
+                        "shape": [],
+                        "precision": 3,
+                    },
                     "metadata": {
                         "connected": True,
                         "read_access": True,
@@ -449,119 +505,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
 
     device_base_class = "positioner" if device_class == "SimPositioner" else "signal"
     if device_base_class == "positioner":
-        signals = {
-            "readback": {
-                "component_name": "readback",
-                "obj_name": device_name,
-                "kind_int": 5,
-                "kind_str": "Kind.hinted",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": False,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "setpoint": {
-                "component_name": "setpoint",
-                "obj_name": f"{device_name}_setpoint",
-                "kind_int": 1,
-                "kind_str": "Kind.normal",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "motor_is_moving": {
-                "component_name": "motor_is_moving",
-                "obj_name": f"{device_name}_motor_is_moving",
-                "kind_int": 1,
-                "kind_str": "Kind.normal",
-            },
-            "velocity": {
-                "component_name": "velocity",
-                "obj_name": f"{device_name}_velocity",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "acceleration": {
-                "component_name": "acceleration",
-                "obj_name": f"{device_name}_acceleration",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "high_limit_travel": {
-                "component_name": "high_limit_travel",
-                "obj_name": f"{device_name}_high_limit_travel",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "low_limit_travel": {
-                "component_name": "low_limit_travel",
-                "obj_name": f"{device_name}_low_limit_travel",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-            "unused": {
-                "component_name": "unused",
-                "obj_name": f"{device_name}_unused",
-                "kind_int": 0,
-                "kind_str": "Kind.omitted",
-                "metadata": {
-                    "connected": True,
-                    "read_access": True,
-                    "write_access": True,
-                    "timestamp": 0,
-                    "status": None,
-                    "severity": None,
-                    "precision": None,
-                },
-            },
-        }
+        signals = positioner_info["device_info"]["signals"]
     elif device_base_class == "signal":
         signals = {
             device_name: {
