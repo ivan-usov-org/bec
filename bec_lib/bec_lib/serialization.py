@@ -11,6 +11,7 @@ import json
 from abc import abstractmethod
 
 import msgpack as msgpack_module
+from pydantic import BaseModel
 
 from bec_lib import messages as messages_module
 from bec_lib import numpy_encoder
@@ -167,6 +168,19 @@ def decode_bec_type(obj):
     return obj
 
 
+def encode_pydantic(obj):
+    if isinstance(obj, BECMessage):
+        # BECMessage is handled by the BECMessage codec
+        return obj
+    if isinstance(obj, BaseModel):
+        return obj.model_dump()
+    return obj
+
+
+def decode_pydantic(obj):
+    return obj
+
+
 class SerializationRegistry:
     """Registry for serialization codecs"""
 
@@ -250,6 +264,12 @@ class SerializationRegistry:
         Register codec for BECMessage type
         """
         self.register_object_hook(encode_bec_type, decode_bec_type)
+
+    def register_pydantic(self):
+        """
+        Register codec for pydantic models
+        """
+        self.register_object_hook(encode_pydantic, decode_pydantic)
 
 
 class MsgpackExt(SerializationRegistry):
@@ -347,6 +367,7 @@ json_ext.register_bec_status()
 json_ext.register_set_encoder()
 json_ext.register_message_endpoint()
 json_ext.register_bec_message_type()
+json_ext.register_pydantic()
 
 msgpack = MsgpackExt()
 msgpack.register_numpy()
@@ -354,6 +375,7 @@ msgpack.register_bec_message()
 msgpack.register_set_encoder()
 msgpack.register_message_endpoint()
 msgpack.register_bec_message_type()
+msgpack.register_pydantic()
 
 
 class SerializationInterface:

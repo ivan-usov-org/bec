@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pydantic import BaseModel
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
@@ -37,3 +38,14 @@ def serializer(request):
 def test_serialize(serializer, data):
     res = serializer.loads(serializer.dumps(data)) == data
     assert all(res) if isinstance(data, np.ndarray) else res
+
+
+def test_serialize_model(serializer):
+
+    class DummyModel(BaseModel):
+        a: int
+        b: int
+
+    data = DummyModel(a=1, b=2)
+    converted_data = serializer.loads(serializer.dumps(data))
+    assert data.model_dump() == converted_data
