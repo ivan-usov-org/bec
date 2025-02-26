@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v3.14.0 (2025-02-26)
+
+### Documentation
+
+- **async_writer**: Improved docs
+  ([`17ec499`](https://gitlab.psi.ch/bec/bec/-/commit/17ec499518770715079c247c678a7e74d9952663))
+
+- **redis_connector**: Added an example to raise_alarm
+  ([`ebd26af`](https://gitlab.psi.ch/bec/bec/-/commit/ebd26afd50830d7b7129de31125cde9e5179c4a3))
+
+### Features
+
+- **async_writer**: Added support for chunked async updates
+  ([`1625e2c`](https://gitlab.psi.ch/bec/bec/-/commit/1625e2ccee61b34d4b5168b9ba978fb77ad2de5d))
+
+
 ## v3.13.3 (2025-02-26)
 
 ### Bug Fixes
