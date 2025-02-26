@@ -693,3 +693,74 @@ def test_computed_signal_raises_error_on_set_compute_method():
     comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
     with pytest.raises(ValueError):
         comp_signal.set_compute_method("a + b")
+
+
+def test_device_summary(dev):
+    """Test that the device summary method creates a table with the correct structure."""
+    with mock.patch("rich.console.Console.print") as mock_print:
+        dev.samx.summary()
+        # verify that print was called with a Table object
+        table = mock_print.call_args[0][0]
+        assert table.title == "samx - Summary of Available Signals"
+        assert [col.header for col in table.columns] == [
+            "Name",
+            "Data Name",
+            "Kind",
+            "Source",
+            "Type",
+            "Doc",
+        ]
+
+
+def test_device_summary_signal_grouping(dev):
+    """Test that signals are correctly grouped by kind in the summary table."""
+
+    with mock.patch("rich.console.Console.print"):
+        with mock.patch("rich.table.Table.add_row") as mock_add_row:
+            dev.samx.summary()
+
+            num_rows = mock_add_row.call_count
+            assert num_rows == len(dev.samx._info["signals"]) + 3  # 3 extra rows for headers
+
+            assert mock_add_row.call_args_list[0][0] == (
+                "readback",
+                "samx",
+                "Kind.hinted",
+                "SIM:samx",
+                "integer",
+                "readback doc string",
+            )
+            assert mock_add_row.call_args_list[1][0] == tuple()
+            assert mock_add_row.call_args_list[2][0] == (
+                "setpoint",
+                "samx_setpoint",
+                "Kind.normal",
+                "SIM:samx_setpoint",
+                "integer",
+                "setpoint doc string",
+            )
+            devs = [row_call[0][0] for row_call in mock_add_row.call_args_list if row_call[0]]
+            assert devs == [
+                "readback",
+                "setpoint",
+                "motor_is_moving",
+                "velocity",
+                "acceleration",
+                "high_limit_travel",
+                "low_limit_travel",
+                "unused",
+            ]
+
+
+def test_device_summary_empty_signals(dev):
+    """Test that summary handles devices with no signals."""
+    # Create a device with no signals
+    device = Device(name="empty_device", info={"signals": {}})
+
+    with mock.patch("rich.console.Console.print") as mock_print:
+        device.summary()
+        table = mock_print.call_args[0][0]
+
+        # Verify table is created but empty
+        assert table.title == "empty_device - Summary of Available Signals"
+        assert len([row for row in table.rows if row]) == 0

@@ -834,7 +834,6 @@ class Device(OphydInterfaceBase):
         via the scan server.
         """
 
-    # @rpc
     def summary(self):
         """
         Provides a summary of the device, all associated signals and their type.
