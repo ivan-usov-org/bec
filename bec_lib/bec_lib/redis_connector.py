@@ -323,6 +323,15 @@ class RedisConnector(ConnectorBase):
             source (dict[str, Any]): source of the alarm
             msg (str): message
             metadata (dict): metadata
+
+        Examples:
+            >>> connector.raise_alarm(
+                severity=Alarms.WARNING,
+                alarm_type="ValueError",
+                source={"device": "samx", "source": "async_file_writer"},
+                msg=f"test alarm",
+                metadata={"test": 1}
+            )
         """
         alarm_msg = AlarmMessage(
             severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
