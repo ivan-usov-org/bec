@@ -112,21 +112,29 @@ def get_device_info(
 
     signals = {}  # []
     if hasattr(obj, "component_names"):
-        for component_name in obj.component_names:
+        walk = obj.walk_components()
+        for _ancestor, component_name, comp in walk:
             if get_device_base_class(getattr(obj, component_name)) == "signal":
                 if component_name in protected_names:
                     raise DeviceConfigError(
                         f"Signal name {component_name} is protected and cannot be used. Please rename the signal."
                     )
+                signal_obj = getattr(obj, component_name)
                 signals.update(
                     {
                         component_name: {
                             "component_name": component_name,
-                            "obj_name": getattr(obj, component_name).name,
-                            "kind_int": getattr(obj, component_name).kind,
-                            "kind_str": str(getattr(obj, component_name).kind),
+                            "obj_name": signal_obj.name,
+                            "kind_int": signal_obj.kind,
+                            "kind_str": str(signal_obj.kind),
+                            "doc": (
+                                comp.doc
+                                if not comp.doc.startswith("Component attribute\n::")
+                                else ""
+                            ),
+                            "describe": signal_obj.describe().get(signal_obj.name, {}),
                             # pylint: disable=protected-access
-                            "metadata": getattr(obj, component_name)._metadata,
+                            "metadata": signal_obj._metadata,
                         }
                     }
                 )
