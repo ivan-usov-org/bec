@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.13.3 (2025-02-26)
+
+### Bug Fixes
+
+- **device**: Fixed used access for properties
+  ([`dc7faab`](https://gitlab.psi.ch/bec/bec/-/commit/dc7faabff096d7ee849326ed83fec29536e7800b))
+
+
 ## v3.13.2 (2025-02-25)
 
 ### Bug Fixes
