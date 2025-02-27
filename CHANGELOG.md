@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v3.16.0 (2025-02-27)
+
+### Bug Fixes
+
+- **device**: Fixed kind access for .read
+  ([`79421ac`](https://gitlab.psi.ch/bec/bec/-/commit/79421acbc82a238cad528a1746a07453bddf26f3))
+
+- **kind**: Fixed kind serialization for py311+
+  ([`d30df18`](https://gitlab.psi.ch/bec/bec/-/commit/d30df186ad2ea8fe8c448b43079d47ac1ef331e8))
+
+### Features
+
+- **client**: Custom summary for devices including docs
+  ([`2c530bf`](https://gitlab.psi.ch/bec/bec/-/commit/2c530bfbb76567fd040ab0e9b6af74c52b95ab4c))
+
+- **device_server**: Add component doc and describe to device info
+  ([`99173c0`](https://gitlab.psi.ch/bec/bec/-/commit/99173c02fd7e7317a7296f49b5f265088fb9aa9a))
+
+### Refactoring
+
+- **device summary**: Renamed Doc to Description
+  ([`c3dcbfa`](https://gitlab.psi.ch/bec/bec/-/commit/c3dcbfa33de54ba6b226afdac212904ffb923f2f))
+
+
 ## v3.15.0 (2025-02-26)
 
 ### Features
