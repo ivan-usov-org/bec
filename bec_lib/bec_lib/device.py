@@ -741,9 +741,9 @@ class OphydInterfaceBase(DeviceBase):
         is_signal = self._signal_info is not None
         if is_signal:
             kind = self._signal_info.get("kind_str")
-            if kind in ("2", "Kind.config"):
+            if kind == "config":
                 is_config_signal = True
-            elif kind in ("0", "Kind.omitted"):
+            elif kind == "omitted":
                 cached = False
         return is_signal, is_config_signal, cached
 
