@@ -708,7 +708,7 @@ def test_device_summary(dev):
             "Kind",
             "Source",
             "Type",
-            "Doc",
+            "Description",
         ]
 
 

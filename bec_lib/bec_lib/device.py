@@ -844,7 +844,7 @@ class Device(OphydInterfaceBase):
         table.add_column("Kind")
         table.add_column("Source")
         table.add_column("Type")
-        table.add_column("Doc")
+        table.add_column("Description")
         signals = self._info.get("signals", {})
         signals_grouped = defaultdict(dict)
         for kind in ["hinted", "normal", "config", "omitted"]:
