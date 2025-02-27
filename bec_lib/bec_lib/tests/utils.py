@@ -93,7 +93,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "readback",
                     "obj_name": device_name,
                     "kind_int": 5,
-                    "kind_str": "Kind.hinted",
+                    "kind_str": "hinted",
                     "doc": "readback doc string",
                     "describe": {
                         "source": f"SIM:{device_name}",
@@ -115,7 +115,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "setpoint",
                     "obj_name": f"{device_name}_setpoint",
                     "kind_int": 1,
-                    "kind_str": "Kind.normal",
+                    "kind_str": "normal",
                     "doc": "setpoint doc string",
                     "describe": {
                         "source": f"SIM:{device_name}_setpoint",
@@ -137,7 +137,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "motor_is_moving",
                     "obj_name": f"{device_name}_motor_is_moving",
                     "kind_int": 1,
-                    "kind_str": "Kind.normal",
+                    "kind_str": "normal",
                     "doc": "motor_is_moving doc string",
                     "describe": {
                         "source": f"SIM:{device_name}_motor_is_moving",
@@ -159,7 +159,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "velocity",
                     "obj_name": f"{device_name}_velocity",
                     "kind_int": 2,
-                    "kind_str": "Kind.config",
+                    "kind_str": "config",
                     "doc": "velocity doc string",
                     "describe": {
                         "source": f"SIM:{device_name}_velocity",
@@ -181,7 +181,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "acceleration",
                     "obj_name": f"{device_name}_acceleration",
                     "kind_int": 2,
-                    "kind_str": "Kind.config",
+                    "kind_str": "config",
                     "doc": "acceleration doc string",
                     "describe": {
                         "source": f"SIM:{device_name}_acceleration",
@@ -203,7 +203,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "high_limit_travel",
                     "obj_name": f"{device_name}_high_limit_travel",
                     "kind_int": 2,
-                    "kind_str": "Kind.config",
+                    "kind_str": "config",
                     "doc": "",
                     "describe": {
                         "source": f"SIM:{device_name}_high_limit_travel",
@@ -225,7 +225,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "low_limit_travel",
                     "obj_name": f"{device_name}_low_limit_travel",
                     "kind_int": 2,
-                    "kind_str": "Kind.config",
+                    "kind_str": "config",
                     "doc": "",
                     "describe": {
                         "source": f"SIM:{device_name}_low_limit_travel",
@@ -247,7 +247,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                     "component_name": "unused",
                     "obj_name": f"{device_name}_unused",
                     "kind_int": 0,
-                    "kind_str": "Kind.omitted",
+                    "kind_str": "omitted",
                     "doc": "",
                     "describe": {
                         "source": f"SIM:{device_name}_unused",
@@ -384,7 +384,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                         "component_name": "message1",
                                         "obj_name": "dyn_signals_messages_message1",
                                         "kind_int": 1,
-                                        "kind_str": "Kind.normal",
+                                        "kind_str": "normal",
                                         "metadata": {
                                             "connected": True,
                                             "read_access": True,
@@ -399,7 +399,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                         "component_name": "message2",
                                         "obj_name": "dyn_signals_messages_message2",
                                         "kind_int": 1,
-                                        "kind_str": "Kind.normal",
+                                        "kind_str": "normal",
                                         "metadata": {
                                             "connected": True,
                                             "read_access": True,
@@ -414,7 +414,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                         "component_name": "message3",
                                         "obj_name": "dyn_signals_messages_message3",
                                         "kind_int": 1,
-                                        "kind_str": "Kind.normal",
+                                        "kind_str": "normal",
                                         "metadata": {
                                             "connected": True,
                                             "read_access": True,
@@ -429,7 +429,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                         "component_name": "message4",
                                         "obj_name": "dyn_signals_messages_message4",
                                         "kind_int": 1,
-                                        "kind_str": "Kind.normal",
+                                        "kind_str": "normal",
                                         "metadata": {
                                             "connected": True,
                                             "read_access": True,
@@ -444,7 +444,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                         "component_name": "message5",
                                         "obj_name": "dyn_signals_messages_message5",
                                         "kind_int": 1,
-                                        "kind_str": "Kind.normal",
+                                        "kind_str": "normal",
                                         "metadata": {
                                             "connected": True,
                                             "read_access": True,

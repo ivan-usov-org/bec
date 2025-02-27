@@ -725,7 +725,7 @@ def test_device_summary_signal_grouping(dev):
             assert mock_add_row.call_args_list[0][0] == (
                 "readback",
                 "samx",
-                "Kind.hinted",
+                "hinted",
                 "SIM:samx",
                 "integer",
                 "readback doc string",
@@ -734,7 +734,7 @@ def test_device_summary_signal_grouping(dev):
             assert mock_add_row.call_args_list[2][0] == (
                 "setpoint",
                 "samx_setpoint",
-                "Kind.normal",
+                "normal",
                 "SIM:samx_setpoint",
                 "integer",
                 "setpoint doc string",

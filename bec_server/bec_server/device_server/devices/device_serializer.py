@@ -125,8 +125,8 @@ def get_device_info(
                         component_name: {
                             "component_name": component_name,
                             "obj_name": signal_obj.name,
-                            "kind_int": signal_obj.kind,
-                            "kind_str": str(signal_obj.kind),
+                            "kind_int": signal_obj.kind.value,
+                            "kind_str": signal_obj.kind.name,
                             "doc": (
                                 comp.doc
                                 if not comp.doc.startswith("Component attribute\n::")
