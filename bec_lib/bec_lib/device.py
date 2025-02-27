@@ -10,9 +10,11 @@ import inspect
 import threading
 import time
 import uuid
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from typing import TYPE_CHECKING, Any
 
+from rich.console import Console
+from rich.table import Table
 from typeguard import typechecked
 
 from bec_lib.endpoints import MessageEndpoints
@@ -739,9 +741,9 @@ class OphydInterfaceBase(DeviceBase):
         is_signal = self._signal_info is not None
         if is_signal:
             kind = self._signal_info.get("kind_str")
-            if kind in ("2", "Kind.config"):
+            if kind == "config":
                 is_config_signal = True
-            elif kind in ("0", "Kind.omitted"):
+            elif kind == "omitted":
                 cached = False
         return is_signal, is_config_signal, cached
 
@@ -832,11 +834,41 @@ class Device(OphydInterfaceBase):
         via the scan server.
         """
 
-    @rpc
     def summary(self):
         """
         Provides a summary of the device, all associated signals and their type.
         """
+        table = Table(title=f"{self.name} - Summary of Available Signals")
+        table.add_column("Name")
+        table.add_column("Data Name")
+        table.add_column("Kind")
+        table.add_column("Source")
+        table.add_column("Type")
+        table.add_column("Description")
+        signals = self._info.get("signals", {})
+        signals_grouped = defaultdict(dict)
+        for kind in ["hinted", "normal", "config", "omitted"]:
+            signals_grouped[kind] = {
+                signal_name: signal_info
+                for signal_name, signal_info in signals.items()
+                if kind in signal_info.get("kind_str")
+            }
+        kind_added = False
+        for kind in ["hinted", "normal", "config", "omitted"]:
+            if kind_added:
+                table.add_row()
+            for signal_name, signal_info in signals_grouped[kind].items():
+                table.add_row(
+                    signal_name,
+                    signal_info.get("obj_name"),
+                    signal_info.get("kind_str"),
+                    signal_info.get("describe", {}).get("source"),
+                    signal_info.get("describe", {}).get("dtype"),
+                    signal_info.get("doc"),
+                )
+                kind_added = True
+        console = Console()
+        console.print(table)
 
 
 class AdjustableMixin:
