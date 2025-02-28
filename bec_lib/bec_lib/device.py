@@ -671,7 +671,9 @@ class OphydInterfaceBase(DeviceBase):
         Triggers the device.
         """
 
-    def read(self, cached=True, use_readback=True, filter_to_hints=False):
+    def read(
+        self, cached=True, use_readback=True, filter_to_hints=False
+    ) -> dict[str, dict[str, Any]] | None:
         """
         Reads the device.
 
@@ -704,7 +706,7 @@ class OphydInterfaceBase(DeviceBase):
             signals = {key: val for key, val in signals.items() if key in self._hints}
         return self._filter_rpc_signals(signals)
 
-    def read_configuration(self, cached=True):
+    def read_configuration(self, cached=True) -> dict[str, dict[str, Any]] | None:
         """
         Reads the device configuration.
 
@@ -730,7 +732,7 @@ class OphydInterfaceBase(DeviceBase):
 
         return self._filter_rpc_signals(signals)
 
-    def _filter_rpc_signals(self, signals):
+    def _filter_rpc_signals(self, signals: dict) -> dict:
         if self._signal_info:
             obj_name = self._signal_info.get("obj_name")
             return {obj_name: signals.get(obj_name, {})}

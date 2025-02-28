@@ -71,7 +71,7 @@ class BECLogger:
         if hasattr(self, "_configured"):
             return
         self.bootstrap_server = None
-        self.connector = None
+        self.connector: RedisConnector | None = None
         self.service_name = None
         self.writer_mixin = None
         self._base_path = None
@@ -98,9 +98,9 @@ class BECLogger:
     def configure(
         self,
         bootstrap_server: list,
-        connector_cls: RedisConnector,
+        connector_cls: type[RedisConnector],
         service_name: str,
-        service_config: dict = None,
+        service_config: dict | None = None,
     ) -> None:
         """
         Configure the logger.
@@ -125,7 +125,7 @@ class BECLogger:
         self._configured = True
         self._update_sinks()
 
-    def _update_base_path(self, service_config: dict = None):
+    def _update_base_path(self, service_config: dict | None = None):
         """
         Compile the log base path.
         """
@@ -144,6 +144,8 @@ class BECLogger:
 
     def _logger_callback(self, msg):
         if not self._configured:
+            return
+        if self.connector is None:
             return
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
@@ -296,6 +298,8 @@ class BECLogger:
 
         if not self.service_name:
             return
+        if not self._base_path:
+            return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
 
         # define a level corresponding to console log - this is to be able to filter messages
@@ -362,7 +366,7 @@ class BECLogger:
         self._stderr_log_level = val
         self._update_sinks()
 
-    def _file_opener(self, path: str, mode: str, **kwargs):
+    def _file_opener(self, path: str, mode: int, **kwargs):
         """
         Open the log file.
 
