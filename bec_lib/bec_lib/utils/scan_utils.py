@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.scan_items import ScanItem
     from bec_lib.scan_report import ScanReport
 

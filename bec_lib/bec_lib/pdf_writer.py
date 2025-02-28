@@ -56,7 +56,7 @@ class PDFWriter:
     RIGHT_MARGIN = 20
     FONT_SIZE = 10
 
-    def __init__(self, file: str, title: str = None, font="Courier") -> None:
+    def __init__(self, file: str, title: str | None = None, font="Courier") -> None:
         """Filer writer for pdfs.
 
         Args:

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 from dotenv import dotenv_values
 
-from bec_lib.connector import ConnectorBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import RedisConnector
@@ -23,7 +22,7 @@ logger = bec_logger.logger
 class AtlasConnector:
 
     def __init__(
-        self, scihub: SciHub, connector: ConnectorBase, redis_atlas: RedisConnector = None
+        self, scihub: SciHub, connector: RedisConnector, redis_atlas: RedisConnector = None
     ) -> None:
         self.scihub = scihub
         self.connector = connector

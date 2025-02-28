@@ -18,8 +18,8 @@ from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.bec_service import parse_cmdline_args
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
-from bec_lib.connector import ConnectorBase
-from bec_lib.logger import LogLevel, bec_logger
+from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import RedisConnector
 from bec_lib.service_config import ServiceConfig
 
 logger = bec_logger.logger
@@ -42,7 +42,7 @@ class BECIPythonClient:
     def __init__(
         self,
         config: ServiceConfig = None,
-        connector_cls: ConnectorBase = None,
+        connector_cls: RedisConnector = None,
         wait_for_server=True,
         forced=False,
     ) -> None:

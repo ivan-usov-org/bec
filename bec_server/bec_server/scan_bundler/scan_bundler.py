@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import collections
 import threading
 import time
 import traceback
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.bec_service import BECService
-from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -15,11 +17,15 @@ from bec_lib.logger import bec_logger
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter
 
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
+
+
 logger = bec_logger.logger
 
 
 class ScanBundler(BECService):
-    def __init__(self, config, connector_cls: ConnectorBase) -> None:
+    def __init__(self, config, connector_cls: RedisConnector) -> None:
         super().__init__(config, connector_cls, unique_service=True)
 
         self.device_manager = None

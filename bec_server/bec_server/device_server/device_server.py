@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from typing import Literal
+from typing import TYPE_CHECKING
 
 import ophyd
 from ophyd import DeviceStatus, Kind, OphydObject, Staged
@@ -15,7 +15,6 @@ from ophyd.utils import errors as ophyd_errors
 from bec_lib import messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.bec_service import BECService
-from bec_lib.connector import ConnectorBase
 from bec_lib.device import OnFailure
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -23,6 +22,9 @@ from bec_lib.messages import BECStatus
 from bec_lib.utils.rpc_utils import rgetattr
 from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 from bec_server.device_server.rpc_mixin import RPCMixin
+
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
 
@@ -207,7 +209,7 @@ class DeviceServer(RPCMixin, BECService):
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
-    def __init__(self, config, connector_cls: ConnectorBase) -> None:
+    def __init__(self, config, connector_cls: RedisConnector) -> None:
         super().__init__(config, connector_cls, unique_service=True)
         self._tasks = []
         self.device_manager = None

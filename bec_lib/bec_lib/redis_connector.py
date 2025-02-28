@@ -38,7 +38,7 @@ import redis.client
 import redis.exceptions
 from redis.client import Pipeline, Redis
 
-from bec_lib.connector import ConnectorBase, MessageObject
+from bec_lib.connector import MessageObject
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfoMessage
@@ -195,16 +195,16 @@ class DirectReadingStreamSubscriptionInfo(StreamSubscriptionInfo):
 @dataclass
 class StreamMessage:
     msg: dict
-    callbacks: list
+    callbacks: Iterable[tuple[Callable, dict]]
 
 
-class RedisConnector(ConnectorBase):
+class RedisConnector:
     """
     Redis connector class. This class is a wrapper around the redis library providing
     a simple interface to send and receive messages from a redis server.
     """
 
-    def __init__(self, bootstrap: list | str, redis_cls: type[Redis] = Redis, **kwargs):
+    def __init__(self, bootstrap: list[str] | str, redis_cls: type[Redis] = Redis, **kwargs):
         """
         Initialize the connector
 
@@ -212,7 +212,6 @@ class RedisConnector(ConnectorBase):
             bootstrap (list): list of strings in the form "host:port"
             redis_cls (redis.client, optional): redis client class. Defaults to the standard client redis.Redis. Must not be an async client.
         """
-        super().__init__(bootstrap)
         self.host, self.port = (
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
         )
@@ -234,7 +233,7 @@ class RedisConnector(ConnectorBase):
         self._messages_queue = queue.Queue()
         self._stop_events_listener_thread = threading.Event()
         self._stop_stream_events_listener_thread = threading.Event()
-        self.stream_keys = {}
+        self.stream_keys: dict[str, str] = {}
 
         self._generator_executor = ThreadPoolExecutor()
 
@@ -253,7 +252,6 @@ class RedisConnector(ConnectorBase):
         """
         Shutdown the connector
         """
-        super().shutdown()
 
         self._generator_executor.shutdown()
 
@@ -873,34 +871,34 @@ class RedisConnector(ConnectorBase):
             try:
                 # wait for a message and return it before timeout expires
                 msg = self._messages_queue.get(timeout=remaining_timeout, block=True)
-                remaining_timeout: float
             except queue.Empty as exc:
+                remaining_timeout = cast(float, remaining_timeout)
                 timeout = cast(float, timeout)
                 if remaining_timeout < timeout:
                     # at least one message has been processed, so we do not raise
                     # the timeout error
                     return True
                 raise TimeoutError(f"{self}: timeout waiting for messages") from exc
+
+            if msg is StopIteration:
+                return False
+
+            try:
+                self._handle_message(msg)
+            # pylint: disable=broad-except
+            except Exception:
+                content = traceback.format_exc()
+                bec_logger.logger.error(f"Error handling message {msg}:\n{content}")
+
+            if timeout is None:
+                if self._messages_queue.empty():
+                    # no message to process
+                    return True
             else:
-                if msg is StopIteration:
-                    return False
-
-                try:
-                    self._handle_message(msg)
-                # pylint: disable=broad-except
-                except Exception:
-                    content = traceback.format_exc()
-                    bec_logger.logger.error(f"Error handling message {msg}:\n{content}")
-
-                if timeout is None:
-                    if self._messages_queue.empty():
-                        # no message to process
-                        return True
-                else:
-                    # calculate how much time remains and retry getting a message
-                    remaining_timeout = timeout - (time.perf_counter() - start_time)
-                    if remaining_timeout <= 0:
-                        return True
+                # calculate how much time remains and retry getting a message
+                remaining_timeout = timeout - (time.perf_counter() - start_time)
+                if remaining_timeout <= 0:
+                    return True
 
     def _dispatch_events(self, started_event):
         started_event.set()
@@ -953,7 +951,7 @@ class RedisConnector(ConnectorBase):
         return client.rpush(topic, msg)  # type: ignore # using sync client
 
     @validate_endpoint("topic")
-    def lrange(self, topic: str, start: int, end: int, pipe=None):
+    def lrange(self, topic: str, start: int, end: int, pipe: Pipeline | None = None):
         """O(S+N) where S is the distance of start offset from HEAD for small
         lists, from nearest end (HEAD or TAIL) for large lists; and N is the
         number of elements in the specified range. Returns the specified elements
@@ -967,7 +965,7 @@ class RedisConnector(ConnectorBase):
 
         # in case of command executed in a pipe, use 'execute_pipeline' method
         ret = []
-        for msg in cmd_result:
+        for msg in cmd_result:  # type: ignore # using sync client; known issue in redis-py
             try:
                 ret.append(MsgpackSerialization.loads(msg))
             except RuntimeError:
@@ -1023,10 +1021,10 @@ class RedisConnector(ConnectorBase):
         data = client.mget(topics)
         if pipe:
             return data
-        return [MsgpackSerialization.loads(d) if d else None for d in data]
+        return [MsgpackSerialization.loads(d) if d else None for d in data]  # type: ignore # using sync client
 
     @validate_endpoint("topic")
-    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
+    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int | None = None):
         """
         add to stream
 
@@ -1078,7 +1076,7 @@ class RedisConnector(ConnectorBase):
             res = client.xrevrange(topic, "+", "-", count=count)
             if not res:
                 return None
-            for _, msg_dict in reversed(res):
+            for _, msg_dict in reversed(res):  # type: ignore # using sync client
                 ret.append(
                     {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
                     if key is None
@@ -1094,7 +1092,12 @@ class RedisConnector(ConnectorBase):
 
     @validate_endpoint("topic")
     def xread(
-        self, topic: str, id: str = None, count: int = None, block: int = None, from_start=False
+        self,
+        topic: str,
+        id: str | None = None,
+        count: int | None = None,
+        block: int | None = None,
+        from_start=False,
     ) -> list | None:
         """
         read from stream
@@ -1127,6 +1130,7 @@ class RedisConnector(ConnectorBase):
                 try:
                     msg = client.xrevrange(topic, "+", "-", count=1)
                     if msg:
+                        msg = cast(list, msg)  # known issue in redis-py; using sync client
                         self.stream_keys[topic] = msg[0][0].decode()
                         out = {}
                         for key, val in msg[0][1].items():
@@ -1152,7 +1156,7 @@ class RedisConnector(ConnectorBase):
         return out if out else None
 
     @validate_endpoint("topic")
-    def xrange(self, topic: str, min: str, max: str, count: int = None):
+    def xrange(self, topic: str, min: str, max: str, count: int | None = None):
         """
         read a range from stream
 
@@ -1167,7 +1171,7 @@ class RedisConnector(ConnectorBase):
         """
         client = self._redis_conn
         msgs = []
-        for reading in client.xrange(topic, min, max, count=count):
+        for reading in client.xrange(topic, min, max, count=count):  # type: ignore # using sync client
             _, msg_dict = reading
             msgs.append(
                 {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
@@ -1176,11 +1180,11 @@ class RedisConnector(ConnectorBase):
 
     def client_id(self) -> int:
         """Get the current connection's client ID."""
-        return self._redis_conn.client_id()
+        return self._redis_conn.client_id()  # type: ignore # using sync client
 
     def unblock_client(self, id: int) -> None:
         """Unblock the client with the given ID."""
-        return self._redis_conn.client_unblock(id)
+        return self._redis_conn.client_unblock(id)  # type: ignore # using sync client
 
     def producer(self):
         """Return itself as a producer, to be compatible with old code"""

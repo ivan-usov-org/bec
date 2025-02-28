@@ -11,7 +11,7 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import MessageObject
 from bec_lib.scan_manager import ScanManager
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.redis_connector import RedisConnector
 
 

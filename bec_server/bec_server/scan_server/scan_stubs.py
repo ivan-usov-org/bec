@@ -17,7 +17,6 @@ import numpy as np
 from typeguard import typechecked
 
 from bec_lib import messages
-from bec_lib.connector import ConnectorBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
@@ -25,7 +24,9 @@ from .errors import DeviceInstructionError, DeviceMessageError
 
 if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.devicemanager import DeviceManagerBase
+    from bec_lib.redis_connector import RedisConnector
     from bec_server.scan_server.instruction_handler import InstructionHandler
+
 
 logger = bec_logger.logger
 
@@ -256,7 +257,7 @@ class ScanStubs:
         self,
         device_manager: DeviceManagerBase,
         instruction_handler: InstructionHandler,
-        connector: ConnectorBase,
+        connector: RedisConnector,
         device_msg_callback: Callable = None,
         shutdown_event: threading.Event = None,
     ) -> None:

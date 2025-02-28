@@ -7,7 +7,7 @@ ObserverManager class is used to manage the observer objects.
 from __future__ import annotations
 
 import enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from typeguard import typechecked
 
@@ -29,11 +29,11 @@ class Observer:
         self,
         name: str,
         device: str,
-        on_trigger: ObserverAction = None,
-        on_resume: ObserverAction = None,
-        limits: list = None,
-        low_limit: float = None,
-        high_limit: float = None,
+        on_trigger: ObserverAction | None = None,
+        on_resume: ObserverAction | None = None,
+        limits: list | None = None,
+        low_limit: float | None = None,
+        high_limit: float | None = None,
         target_value=None,
     ):
         self.name = name
@@ -57,7 +57,7 @@ class Observer:
 
     @limits.setter
     @typechecked
-    def limits(self, val: list):
+    def limits(self, val: list[Any]):
         self._limits = val
 
     @property

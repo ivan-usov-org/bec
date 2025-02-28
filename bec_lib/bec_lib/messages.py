@@ -646,7 +646,7 @@ class DeviceConfigMessage(BECMessage):
     """
 
     msg_type: ClassVar[str] = "device_config_message"
-    action: Literal["add", "set", "update", "reload", "remove"] = Field(
+    action: Literal["add", "set", "update", "reload", "remove"] | None = Field(
         default=None, validate_default=True
     )
     config: dict | None = Field(default=None)

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from bec_lib.logger import bec_logger
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.messages import BECMessage
 
 logger = bec_logger.logger
@@ -31,13 +31,13 @@ class MessageObject:
         self._value = value
 
     @property
-    def value(self) -> BECMessage:
+    def value(self) -> BECMessage | list[BECMessage]:
         """
         Get the message
         """
         return self._value
 
-    def __eq__(self, ref_val: MessageObject) -> bool:
+    def __eq__(self, ref_val: object) -> bool:
         if not isinstance(ref_val, MessageObject):
             return False
         return self._value == ref_val.value and self.topic == ref_val.topic
@@ -84,7 +84,7 @@ class StoreInterface(abc.ABC):
         """Get a range of values from the list"""
 
     @abc.abstractmethod
-    def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+    def set(self, topic: str, msg, pipe=None, expire: int | None = None) -> None:
         """Set a value"""
 
     @abc.abstractmethod
@@ -100,7 +100,7 @@ class StoreInterface(abc.ABC):
         """Get a value"""
 
     @abc.abstractmethod
-    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
+    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int | None = None):
         """Add a message to the stream"""
 
     @abc.abstractmethod
@@ -155,7 +155,7 @@ class ConnectorBase(PubSubInterface, StoreInterface):
         """send a msg to the client, will automatically be logged too."""
         raise NotImplementedError
 
-    def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+    def set_and_publish(self, topic: str, msg, pipe=None, expire: int | None = None) -> None:
         """Set a value and publish it"""
         raise NotImplementedError
 
