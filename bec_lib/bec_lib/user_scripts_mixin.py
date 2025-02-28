@@ -19,7 +19,7 @@ from bec_lib.callback_handler import EventType
 from bec_lib.logger import bec_logger
 from bec_lib.utils.import_utils import lazy_import, lazy_import_from
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pylint.message import Message
 
 logger = bec_logger.logger

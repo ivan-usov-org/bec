@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from bec_lib.logger import bec_logger
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.messages import BECMessage
 
 logger = bec_logger.logger

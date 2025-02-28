@@ -20,7 +20,7 @@ try:
 except ImportError:
     logger.info("Unable to import `scilog` optional dependency")
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib.redis_connector import RedisConnector
 
 
