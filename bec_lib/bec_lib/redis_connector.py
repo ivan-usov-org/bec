@@ -14,7 +14,6 @@ import sys
 import threading
 import time
 import traceback
-import typing
 import warnings
 from collections.abc import MutableMapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
@@ -24,13 +23,14 @@ from glob import fnmatch
 from typing import (
     TYPE_CHECKING,
     Any,
-    Awaitable,
     Callable,
     Concatenate,
     Generator,
     Iterable,
     Literal,
     ParamSpec,
+    TypedDict,
+    cast,
 )
 
 import louie
@@ -45,9 +45,17 @@ from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfo
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:  # pragma: no cover
+    from concurrent.futures import Future
+
     from bec_lib.alarm_handler import Alarms
 
 P = ParamSpec("P")
+
+
+class PubSubMessage(TypedDict):
+    channel: bytes
+    data: bytes
+    pattern: bytes | None
 
 
 class IncompatibleMessageForEndpoint(TypeError): ...
@@ -155,7 +163,7 @@ def validate_endpoint(endpoint_arg_name: str):
 
 @dataclass
 class GeneratorExecution:
-    fut: Awaitable
+    fut: Future[Any]
     g: Generator
 
 
@@ -209,7 +217,7 @@ class RedisConnector(ConnectorBase):
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
         )
 
-        self._redis_conn = redis_cls(host=self.host, port=self.port)
+        self._redis_conn = redis_cls(host=self.host, port=int(self.port))
 
         # main pubsub connection
         self._pubsub_conn = self._redis_conn.pubsub()
@@ -766,7 +774,8 @@ class RedisConnector(ConnectorBase):
             for subscription_info in unsubscribe_list:
                 if isinstance(subscription_info, DirectReadingStreamSubscriptionInfo):
                     subscription_info.stop_event.set()
-                    subscription_info.thread.join()
+                    if subscription_info.thread:
+                        subscription_info.thread.join()
                 # it is possible to register the same stream multiple times with different
                 # callbacks, in this case when unregistering with cb=None (unregister all)
                 # the topic can be deleted multiple times, hence try...except in code below
@@ -813,7 +822,7 @@ class RedisConnector(ConnectorBase):
                 # reschedule execution to delineate the generator
                 self._messages_queue.put(g)
 
-    def _handle_message(self, msg):
+    def _handle_message(self, msg: StreamMessage | GeneratorExecution | PubSubMessage):
         if inspect.isgenerator(msg):
             g = msg
             fut = self._generator_executor.submit(next, g)
@@ -842,13 +851,13 @@ class RedisConnector(ConnectorBase):
                     callbacks = self._topics_cb[msg["pattern"].decode()]
                 else:
                     callbacks = self._topics_cb[channel]
-            msg = MessageObject(topic=channel, value=MsgpackSerialization.loads(msg["data"]))
+            msg_obj = MessageObject(topic=channel, value=MsgpackSerialization.loads(msg["data"]))
             for cb_ref, kwargs in callbacks:
                 cb = cb_ref()
                 if cb:
-                    self._execute_callback(cb, msg, kwargs)
+                    self._execute_callback(cb, msg_obj, kwargs)
 
-    def poll_messages(self, timeout=None) -> None:
+    def poll_messages(self, timeout: float | None = None) -> bool:
         """Poll messages from the messages queue
 
         If timeout is None, wait for at least one message. Processes until queue is empty,
@@ -864,7 +873,9 @@ class RedisConnector(ConnectorBase):
             try:
                 # wait for a message and return it before timeout expires
                 msg = self._messages_queue.get(timeout=remaining_timeout, block=True)
+                remaining_timeout: float
             except queue.Empty as exc:
+                timeout = cast(float, timeout)
                 if remaining_timeout < timeout:
                     # at least one message has been processed, so we do not raise
                     # the timeout error

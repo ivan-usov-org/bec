@@ -26,7 +26,7 @@ class MessageObject:
     MessageObject is a wrapper for a message and its topic
     """
 
-    def __init__(self, topic: str, value: BECMessage) -> None:
+    def __init__(self, topic: str, value: BECMessage | list[BECMessage]) -> None:
         self.topic = topic
         self._value = value
 
@@ -62,7 +62,12 @@ class StoreInterface(abc.ABC):
 
     @abc.abstractmethod
     def lpush(
-        self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
+        self,
+        topic: str,
+        msg: str | BECMessage,
+        pipe: None = None,
+        max_size: int | None = None,
+        expire: int | None = None,
     ) -> None:
         """Push a message to the left of the list"""
 
@@ -102,16 +107,16 @@ class StoreInterface(abc.ABC):
     def xread(
         self,
         topic: str,
-        id: str = None,
-        count: int = None,
-        block: int = None,
+        id: str | None = None,
+        count: int | None = None,
+        block: int | None = None,
         pipe=None,
         from_start=False,
     ) -> list:
         """Read from the stream"""
 
     @abc.abstractmethod
-    def xrange(self, topic: str, min: str, max: str, count: int = None, pipe=None):
+    def xrange(self, topic: str, min: str, max: str, count: int | None = None, pipe=None):
         """Read from the stream"""
 
 
@@ -131,11 +136,11 @@ class PubSubInterface(abc.ABC):
         """Register a callback for a topic or pattern"""
 
     @abc.abstractmethod
-    def unregister(self, topics=None, pattern=None, cb=None):
+    def unregister(self, topics=None, patterns=None, cb=None):
         """Unregister a callback for a topic or pattern"""
 
     @abc.abstractmethod
-    def poll_messages(self, timeout=None):
+    def poll_messages(self, timeout: float | None = None) -> bool:
         """Poll for new messages, receive them and execute callbacks"""
 
 
