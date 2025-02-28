@@ -64,7 +64,7 @@ class ScanStorage:
 
 
 class FileWriterManager(BECService):
-    def __init__(self, config: ServiceConfig, connector_cls: RedisConnector) -> None:
+    def __init__(self, config: ServiceConfig, connector_cls: type[RedisConnector]) -> None:
         """
         Service to write scan data to file.
 
