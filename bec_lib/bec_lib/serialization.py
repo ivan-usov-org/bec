@@ -435,7 +435,7 @@ class MsgpackSerialization(SerializationInterface):
     ext_type_offset_to_data = {199: 3, 200: 4, 201: 6}
 
     @staticmethod
-    def loads(msg) -> dict:
+    def loads(msg) -> BECMessage | list[BECMessage]:
         with pause_gc():
             try:
                 msg = msgpack.loads(msg)
