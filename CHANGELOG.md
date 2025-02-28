@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.16.1 (2025-02-28)
+
+### Bug Fixes
+
+- **redis_connector**: Minor changes for type hints on redis connector
+  ([`1579516`](https://gitlab.psi.ch/bec/bec/-/commit/15795161b2bccb3dd95598b3a194a74a9b4ff589))
+
+### Refactoring
+
+- **bec_lib**: Removed async data handler
+  ([`c91666f`](https://gitlab.psi.ch/bec/bec/-/commit/c91666f383bd37e39188743339d5d4db2c5f13d9))
+
+
 ## v3.16.0 (2025-02-27)
 
 ### Bug Fixes
