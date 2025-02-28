@@ -9,6 +9,7 @@ import copy
 import re
 import traceback
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from rich.console import Console
@@ -620,8 +621,20 @@ class DeviceManagerBase:
 
     @staticmethod
     def _update_scan_info(msg, *, parent, **kwargs) -> None:
-        msg = msg.value
+        msg: ScanStatusMessage = msg.value
         logger.info(f"Received new ScanStatusMessage with ID {msg.scan_id}")
+
+        # freeze the message to prevent changes from within devices
+        for item in [
+            "user_metadata",
+            "readout_priority",
+            "request_inputs",
+            "metadata",
+            "scan_parameters",
+        ]:
+            if hasattr(msg, item):
+                setattr(msg, item, MappingProxyType(getattr(msg, item)))
+        msg.model_config["frozen"] = True
         parent.scan_info.msg = msg
 
     def _get_config(self):
