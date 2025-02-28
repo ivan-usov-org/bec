@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING
 import bec_lib
 from bec_lib import messages
 from bec_lib.client import BECClient
-from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import RedisConnector
 from bec_lib.scans import Scans
 
 if TYPE_CHECKING:
@@ -572,8 +572,12 @@ class SignalMock:  # pragma: no cover
         self.is_set = True
 
 
-class ConnectorMock(ConnectorBase):  # pragma: no cover
-    def __init__(self, bootstrap_server="localhost:0000", store_data=True):
+class ConnectorMock(RedisConnector):  # pragma: no cover
+    def __init__(self, bootstrap_server: list[str] | str = "localhost:0000", store_data=True):
+        if isinstance(bootstrap_server, list):
+            bootstrap_server = bootstrap_server[0]
+        if ":" not in bootstrap_server:
+            bootstrap_server = f"{bootstrap_server}:0000"
         super().__init__(bootstrap_server)
         self.message_sent = []
         self._get_buffer = {}

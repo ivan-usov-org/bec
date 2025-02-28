@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bec_lib import messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.bec_service import BECService
-from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase as DeviceManager
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -13,6 +14,9 @@ from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_manager import ScanManager
 from .scan_queue import QueueManager
+
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
 
@@ -25,7 +29,7 @@ class ScanServer(BECService):
     scan_assembler = None
     scan_manager = None
 
-    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase):
+    def __init__(self, config: ServiceConfig, connector_cls: RedisConnector):
         super().__init__(config, connector_cls, unique_service=True)
         self._start_scan_manager()
         self._start_queue_manager()

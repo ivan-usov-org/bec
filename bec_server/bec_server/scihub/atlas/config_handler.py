@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 import bec_lib
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
-from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase as DeviceManager
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -17,7 +16,9 @@ from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
+    from bec_lib.redis_connector import RedisConnector
     from bec_server.scihub.atlas.atlas_connector import AtlasConnector
+
 
 logger = bec_logger.logger
 
@@ -25,7 +26,7 @@ dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_lib.__file__), "./co
 
 
 class ConfigHandler:
-    def __init__(self, atlas_connector: AtlasConnector, connector: ConnectorBase) -> None:
+    def __init__(self, atlas_connector: AtlasConnector, connector: RedisConnector) -> None:
         self.atlas_connector = atlas_connector
         self.connector = connector
         self.device_manager = DeviceManager(self.atlas_connector.scihub)

@@ -35,7 +35,6 @@ from bec_lib.utils.import_utils import lazy_import_from
 logger = bec_logger.logger
 
 if TYPE_CHECKING:  # pragma: no cover
-    from bec_lib.connector import ConnectorBase
     from bec_lib.messages import BECStatus, VariableMessage
     from bec_lib.redis_connector import RedisConnector
     from bec_lib.scan_manager import ScanManager
@@ -101,7 +100,7 @@ class BECClient(BECService, UserScriptsMixin):
     def __init__(
         self,
         config: ServiceConfig = None,
-        connector_cls: ConnectorBase = None,
+        connector_cls: RedisConnector = None,
         wait_for_server=False,
         forced=False,
         parent=None,
@@ -112,7 +111,7 @@ class BECClient(BECService, UserScriptsMixin):
 
         Args:
             config (ServiceConfig, optional): The configuration for the client. Defaults to None.
-            connector_cls (ConnectorBase, optional): The connector class to use. Defaults to None.
+            connector_cls (RedisConnector, optional): The connector class to use. Defaults to None.
             wait_for_server (bool, optional): Whether to wait for the server to be available before starting. Defaults to False.
             forced (bool, optional): Whether to force the initialization of a new client. Defaults to False.
             name (str, optional): The name of the client. Defaults to None.

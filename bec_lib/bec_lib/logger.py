@@ -23,8 +23,8 @@ from bec_lib.utils.import_utils import lazy_import_from
 if TYPE_CHECKING:  # pragma: no cover
     from loguru import logger as loguru_logger
 
-    from bec_lib.connector import ConnectorBase
     from bec_lib.file_utils import LogWriter
+    from bec_lib.redis_connector import RedisConnector
 else:
     loguru_logger = lazy_import_from("loguru", ("logger",))
     LogWriter = lazy_import_from("bec_lib.file_utils", ("LogWriter",))
@@ -98,7 +98,7 @@ class BECLogger:
     def configure(
         self,
         bootstrap_server: list,
-        connector_cls: ConnectorBase,
+        connector_cls: RedisConnector,
         service_name: str,
         service_config: dict = None,
     ) -> None:
@@ -107,7 +107,7 @@ class BECLogger:
 
         Args:
             bootstrap_server (list): List of bootstrap servers.
-            connector_cls (ConnectorBase): Connector class.
+            connector_cls (RedisConnector): Connector class.
             service_name (str): Name of the service to which the logger belongs.
         """
         if self._configured:

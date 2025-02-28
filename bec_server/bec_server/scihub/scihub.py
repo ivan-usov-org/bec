@@ -1,14 +1,20 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from bec_lib import messages
 from bec_lib.bec_service import BECService
-from bec_lib.connector import ConnectorBase
 from bec_lib.service_config import ServiceConfig
 from bec_server.scihub.atlas import AtlasConnector
 from bec_server.scihub.scilog import SciLogConnector
 from bec_server.scihub.service_handler.service_handler import ServiceHandler
 
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
+
 
 class SciHub(BECService):
-    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase) -> None:
+    def __init__(self, config: ServiceConfig, connector_cls: RedisConnector) -> None:
         super().__init__(config, connector_cls, unique_service=True)
         self.config = config
         self.atlas_connector = None

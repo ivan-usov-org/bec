@@ -204,7 +204,7 @@ class RedisConnector(ConnectorBase):
     a simple interface to send and receive messages from a redis server.
     """
 
-    def __init__(self, bootstrap: list | str, redis_cls: type[Redis] = Redis, **kwargs):
+    def __init__(self, bootstrap: list[str] | str, redis_cls: type[Redis] = Redis, **kwargs):
         """
         Initialize the connector
 

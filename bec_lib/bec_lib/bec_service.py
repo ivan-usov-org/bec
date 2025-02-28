@@ -27,7 +27,6 @@ from bec_lib.utils.import_utils import lazy_import, lazy_import_from
 
 if TYPE_CHECKING:  # pragma: no cover
     from bec_lib import messages
-    from bec_lib.connector import ConnectorBase
     from bec_lib.messages import BECStatus
     from bec_lib.redis_connector import RedisConnector
 else:
@@ -95,7 +94,7 @@ class BECService:
     def __init__(
         self,
         config: str | ServiceConfig,
-        connector_cls: ConnectorBase,
+        connector_cls: RedisConnector,
         unique_service=False,
         wait_for_server=False,
         name: str | None = None,
