@@ -1,6 +1,28 @@
 # CHANGELOG
 
 
+## v3.17.0 (2025-03-03)
+
+### Features
+
+- **scan_history**: Add __len__ method to ScanHistory class
+  ([`736ff5d`](https://gitlab.psi.ch/bec/bec/-/commit/736ff5d33dbbfade4a510d2e676da7a271b4c323))
+
+### Refactoring
+
+- **bec_lib**: Added pragma no covers
+  ([`bd983af`](https://gitlab.psi.ch/bec/bec/-/commit/bd983aff0a1768c147aacb2926fbf5b399ddf48d))
+
+- **bec_lib**: Improved type hints across bec_lib
+  ([`91d5c38`](https://gitlab.psi.ch/bec/bec/-/commit/91d5c38a4abf8d1022edf341e64d6443574b3649))
+
+- **type hints**: More type hints improvements for redis connector
+  ([`1d8792f`](https://gitlab.psi.ch/bec/bec/-/commit/1d8792fdc5f71174d9eb2a155f3aa4a19e082b67))
+
+- **type hints**: Moved from ConnectorBase to RedisConnector
+  ([`53ccab1`](https://gitlab.psi.ch/bec/bec/-/commit/53ccab11505e40bb60914ae0bf78c3b4710d4e05))
+
+
 ## v3.16.1 (2025-02-28)
 
 ### Bug Fixes
