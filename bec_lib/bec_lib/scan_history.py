@@ -102,6 +102,10 @@ class ScanHistory:
                 return out
         return None
 
+    def __len__(self) -> int:
+        with self._scan_data_lock:
+            return len(self._scan_ids)
+
     def __getitem__(self, index: int | slice) -> ScanDataContainer | list[ScanDataContainer]:
         with self._scan_data_lock:
             if isinstance(index, int):
