@@ -167,7 +167,8 @@ class RequestHandler:
                 status_obj.exception() for status_obj in self._storage[instr_id]["status_objects"]
             ]
             if any(exceptions):
-                self.set_finished(instr_id, success=False)
+                error = next(val for val in exceptions if val)
+                self.set_finished(instr_id, success=False, error_message=str(error))
             else:
                 self.set_finished(instr_id, success=True)
 
