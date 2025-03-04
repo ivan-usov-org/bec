@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.17.1 (2025-03-04)
+
+### Bug Fixes
+
+- **device_server**: Include error message in set_finished on exceptions
+  ([`242a2f0`](https://gitlab.psi.ch/bec/bec/-/commit/242a2f085322881e9182e5871b8f075ffd192553))
+
+
 ## v3.17.0 (2025-03-03)
 
 ### Features
