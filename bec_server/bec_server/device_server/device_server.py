@@ -95,6 +95,25 @@ class RequestHandler:
         """
         return self._storage.get(instr_id)
 
+    def patch_num_status_objects(
+        self, instr: messages.DeviceInstructionMessage, num_status_objects: int
+    ) -> None:
+        """
+        Patch the number of status objects for a request.
+
+        Args:
+            instr(messages.DeviceInstructionMessage): The instruction to patch.
+            num_status_objects(int): The new number of status objects.
+        """
+        instr_id = instr.metadata["device_instr_id"]
+        request_info = self.get_request(instr_id)
+        if request_info is None:
+            raise ValueError(f"Request with ID {instr_id} not found.")
+        request_info["num_status_objects"] = num_status_objects
+
+        if num_status_objects == 0:
+            self.set_finished(instr_id, success=True)
+
     def remove_request(self, instr_id: str):
         """
         Remove a request from the storage.
@@ -391,6 +410,7 @@ class DeviceServer(RPCMixin, BECService):
             status = obj.obj.trigger()
 
             status.__dict__["instruction"] = instr
+            status.__dict__["obj"] = obj.obj
             self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
 
     def _kickoff_device(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -409,6 +429,7 @@ class DeviceServer(RPCMixin, BECService):
         status = obj.kickoff()
 
         status.__dict__["instruction"] = instr
+        status.__dict__["obj"] = obj
         self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
 
     def _complete_device(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -420,24 +441,24 @@ class DeviceServer(RPCMixin, BECService):
                 devices = [devices]
 
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
-
+        num_status_objects = 0
         for dev in devices:
             obj = self.device_manager.devices.get(dev).obj
             if not hasattr(obj, "complete"):
-                # if the device does not have a complete method, we assume that it is done
-                status = ophyd.StatusBase()
-                status.__dict__["obj"] = obj
-                status.set_finished()
-            else:
-                logger.debug(f"Completing device: {dev}")
-                status = obj.complete()
+                continue
+            num_status_objects += 1
+            logger.debug(f"Completing device: {dev}")
+            status = obj.complete()
             if status is None:
                 raise InvalidDeviceError(
                     f"The complete method of device {dev} does not return a DeviceStatus object."
                 )
 
             status.__dict__["instruction"] = instr
+            status.__dict__["obj"] = obj
             self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
+
+        self.requests_handler.patch_num_status_objects(instr, num_status_objects)
 
     def _set_device(self, instr: messages.DeviceInstructionMessage) -> None:
         self.requests_handler.add_request(instr, num_status_objects=1)
@@ -472,19 +493,25 @@ class DeviceServer(RPCMixin, BECService):
             devices = [devices]
 
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
+        num_status_objects = 0
         for dev in devices:
             status = None
             obj = self.device_manager.devices[dev].obj
             if hasattr(obj, "pre_scan"):
                 status = obj.pre_scan()
-
+            if status is None:
+                continue
             if not isinstance(status, DeviceStatus):
-                status = DeviceStatus(obj)
-                status.set_finished()
+                raise ValueError(
+                    f"The pre_scan method of {dev} does not return a DeviceStatus object."
+                )
+
+            num_status_objects += 1
             status.__dict__["instruction"] = instr
             status.__dict__["obj"] = obj
-
             self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
+
+        self.requests_handler.patch_num_status_objects(instr, num_status_objects)
 
     def status_callback(self, status):
         pipe = self.connector.pipeline()
@@ -655,13 +682,9 @@ class DeviceServer(RPCMixin, BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
-        # once we have a status object for each device, we can
-        # replace the following line with the commented one
-        # self.requests_handler.add_request(instr, num_status_objects=len(devices))
-        # moreover, we will then need to add the status objects to the request handler
-        # self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status_obj)
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
 
+        num_status_objects = 0
         for dev in devices:
             status = None
             obj = self.device_manager.devices[dev].obj
@@ -685,14 +708,20 @@ class DeviceServer(RPCMixin, BECService):
                                 f"Unstaging device {dev} failed to finish in 30 seconds"
                             )
                 status = self.device_manager.devices[dev].obj.stage()
-            if not isinstance(status, DeviceStatus):
-                status = DeviceStatus(obj)
-                status.set_finished()
-            status.__dict__["instruction"] = instr
-            status.__dict__["obj"] = obj
-            status.__dict__["status"] = 1
-            status.add_callback(self._device_staged_callback)
-            self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
+                if status is None or isinstance(status, list):
+                    continue
+                if not isinstance(status, DeviceStatus):
+                    raise ValueError(
+                        f"The stage method of {dev} does not return a DeviceStatus object."
+                    )
+                num_status_objects += 1
+                status.__dict__["instruction"] = instr
+                status.__dict__["obj"] = obj
+                status.__dict__["status"] = 1
+                status.add_callback(self._device_staged_callback)
+                self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
+
+        self.requests_handler.patch_num_status_objects(instr, num_status_objects)
 
     def _device_staged_callback(self, status: DeviceStatus) -> None:
         """Set the device status to staged"""
@@ -715,12 +744,8 @@ class DeviceServer(RPCMixin, BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
-        # once we have a status object for each device, we can
-        # replace the following line with the commented one
-        # self.requests_handler.add_request(instr, num_status_objects=len(devices))
-        # moreover, we will then need to add the status objects to the request handler
-        # self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status_obj)
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
+        num_status_objects = 0
         for dev in devices:
             status = None
             obj = self.device_manager.devices[dev].obj
@@ -730,13 +755,17 @@ class DeviceServer(RPCMixin, BECService):
                     status = self.device_manager.devices[dev].obj.unstage()
                 else:
                     logger.debug(f"Device {obj.name} was already unstaged.")
-
+            if status is None or isinstance(status, list):
+                continue
             if not isinstance(status, DeviceStatus):
-                status = DeviceStatus(obj)
-                status.set_finished()
+                raise ValueError(
+                    f"The unstage method of {dev} does not return a DeviceStatus object."
+                )
+            num_status_objects += 1
             status.__dict__["instruction"] = instr
             status.__dict__["obj"] = obj
             status.__dict__["status"] = 0
-
             status.add_callback(self._device_staged_callback)
             self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
+
+        self.requests_handler.patch_num_status_objects(instr, num_status_objects)
