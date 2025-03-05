@@ -62,8 +62,8 @@ class RequestHandler:
         self,
         instr: messages.DeviceInstructionMessage,
         num_status_objects: int,
-        done=False,
-        success: bool = None,
+        done: bool = False,
+        success: bool | None = None,
     ):
         """
         Add a new device instruction to the storage and the expected number of status objects.
@@ -86,7 +86,7 @@ class RequestHandler:
             raise ValueError("If the instruction is done, the success status must be set.")
         self.send_device_instruction_response(instr_id, success, done)
 
-    def get_request(self, instr_id: str) -> messages.DeviceInstructionMessage:
+    def get_request(self, instr_id: str) -> dict:
         """
         Get a request from the storage.
 
@@ -472,19 +472,19 @@ class DeviceServer(RPCMixin, BECService):
             devices = [devices]
 
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
-
-        pipe = self.connector.pipeline()
         for dev in devices:
-            obj = self.device_manager.devices.get(dev)
-            obj.metadata = instr.metadata
-            if hasattr(obj.obj, "pre_scan"):
-                obj.obj.pre_scan()
-            # dev_msg = messages.DeviceReqStatusMessage(
-            #     device=dev, success=True, metadata=instr.metadata
-            # )
-            # self.connector.set(MessageEndpoints.device_req_status(dev), dev_msg, pipe, expire=18000)
-        pipe.execute()
-        self.requests_handler.set_finished(instr.metadata["device_instr_id"], success=True)
+            status = None
+            obj = self.device_manager.devices[dev].obj
+            if hasattr(obj, "pre_scan"):
+                status = obj.pre_scan()
+
+            if not isinstance(status, DeviceStatus):
+                status = DeviceStatus(obj)
+                status.set_finished()
+            status.__dict__["instruction"] = instr
+            status.__dict__["obj"] = obj
+
+            self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status)
 
     def status_callback(self, status):
         pipe = self.connector.pipeline()
@@ -721,7 +721,6 @@ class DeviceServer(RPCMixin, BECService):
         # moreover, we will then need to add the status objects to the request handler
         # self.requests_handler.add_status_object(instr.metadata["device_instr_id"], status_obj)
         self.requests_handler.add_request(instr, num_status_objects=len(devices))
-        status = None
         for dev in devices:
             status = None
             obj = self.device_manager.devices[dev].obj
