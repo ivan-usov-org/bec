@@ -947,6 +947,20 @@ class GUIAutoUpdateConfigMessage(BECMessage):
     selected_device: str
 
 
+class GUIRegistryStateMessage(BECMessage):
+    """Message for GUI registry state. The dictionary contains the state of the GUI registry.
+
+    Args:
+        state (dict[str, dict[Literal["gui_id", "name", "widget_class", "config", "__rpc__"], Any]): GUI registry state
+        metadata (dict, optional): Metadata. Defaults to None.
+    """
+
+    msg_type: ClassVar[str] = "gui_registry_state_message"
+    state: dict[
+        str, dict[Literal["gui_id", "name", "widget_class", "config", "__rpc__"], str | dict | bool]
+    ]
+
+
 class ServiceResponseMessage(BECMessage):
     """Message for service responses
 
