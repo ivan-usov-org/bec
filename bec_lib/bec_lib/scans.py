@@ -309,7 +309,7 @@ class Scans:
         params = {}
         for cmds in partition(bundle_size, args):
             cmds_serialized = [
-                cmd._compile_function_path() if hasattr(cmd, "_compile_function_path") else cmd
+                (cmd._compile_function_path() if hasattr(cmd, "_compile_function_path") else cmd)
                 for cmd in cmds
             ]
             params[cmds_serialized[0]] = cmds_serialized[1:]

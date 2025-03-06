@@ -137,7 +137,8 @@ class PluginStructure:
 
         self.create_dir(f"{self.plugin_name}/bec_widgets/configs")
         self.create_dir(f"{self.plugin_name}/bec_widgets/widgets")
-        self.create_init_file(f"{self.plugin_name}/bec_widgets/widgets")
+        widget_init = os.path.join(current_dir, "plugin_setup_files", "widgets_init_file.py")
+        os.system(f"cp {widget_init} {self.plugin_name}/bec_widgets/widgets/__init__.py")
 
     def add_file_writer(self):
         self.create_dir(f"{self.plugin_name}/file_writer")

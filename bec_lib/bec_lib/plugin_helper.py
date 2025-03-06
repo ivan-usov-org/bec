@@ -51,6 +51,19 @@ def get_plugin_class(class_spec: str, additional_modules=None) -> type:
     return getattr(module, class_name)
 
 
+def get_widget_plugins() -> dict[str, type]:
+    """
+    Load all widget plugins.
+
+    Returns:
+        dict: A dictionary with the plugin names as keys and the plugin classes as values.
+    """
+    if not (widget_plugin := _get_available_plugins("bec.widgets.user_widgets")):
+        return {}
+    # Implemented in the plugin repo to avoid introducing a dependency on bec_widgets here.
+    return widget_plugin[0].get_all_plugin_widgets()
+
+
 def get_scan_plugins() -> dict:
     """
     Load all scan plugins.
@@ -88,7 +101,7 @@ def get_file_writer_plugins() -> dict:
 
 
 @cache
-def get_metadata_schema_registry() -> tuple[dict, type[BasicScanMetadata]]:
+def get_metadata_schema_registry() -> tuple[dict, type[BasicScanMetadata] | None]:
     module = _get_available_plugins("bec.scans.metadata_schema")
     if len(module) == 0:
         return {}, None
@@ -179,3 +192,7 @@ def _import_module(module_name: str):
     """
     module = importlib.import_module(module_name)
     return module
+
+
+if __name__ == "__main__":
+    plugs = get_widget_plugins()
