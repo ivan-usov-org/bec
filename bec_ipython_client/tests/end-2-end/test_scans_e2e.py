@@ -763,12 +763,18 @@ def test_async_data(bec_ipython_client_fixture):
     dev.waveform.async_update.set("append")
     s1 = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
     s1.wait()
-    waveform_data = s1.scan.data.devices.waveform.waveform_waveform.read()
+    while True:
+        waveform_data = s1.scan.data.devices.waveform.waveform_waveform.read()
+        if len(waveform_data["value"]) == 10:
+            break
     np.testing.assert_array_equal(waveform_data["value"], amplitude * np.ones((10, 10)))
     dev.waveform.async_update.set("extend")
     s1 = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
     s1.wait()
-    waveform_data = s1.scan.data.devices.waveform.waveform_waveform.read()
+    while True:
+        waveform_data = s1.scan.data.devices.waveform.waveform_waveform.read()
+        if len(waveform_data["value"]) == 100:
+            break
     np.testing.assert_array_equal(waveform_data["value"], amplitude * np.ones(100))
 
 
