@@ -113,6 +113,8 @@ class RequestHandler:
 
         if num_status_objects == 0:
             self.set_finished(instr_id, success=True)
+        elif num_status_objects == len(request_info["status_objects"]):
+            self._update_instruction(instr_id)
 
     def remove_request(self, instr_id: str):
         """
@@ -173,6 +175,15 @@ class RequestHandler:
         """
         self.parent.status_callback(status_obj)
         instr_id = status_obj.instruction.metadata["device_instr_id"]
+        self._update_instruction(instr_id)
+
+    def _update_instruction(self, instr_id: str) -> None:
+        """
+        Update the instruction in the storage.
+
+        Args:
+            instr_id(str): The ID of the instruction.
+        """
         request_info = self.get_request(instr_id)
         if request_info is None:
             logger.warning(f"Received status object for unknown instruction {instr_id}.")
