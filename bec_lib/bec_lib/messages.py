@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import enum
@@ -9,7 +10,7 @@ from typing import Any, ClassVar, Literal
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-from bec_lib.metadata_schema import BasicScanMetadata, get_metadata_schema_for_scan
+from bec_lib.metadata_schema import get_metadata_schema_for_scan
 
 
 class BECStatus(enum.Enum):
@@ -751,7 +752,7 @@ class FileMessage(BECMessage):
         if v is False:
             return v
         if v is True:
-            return cls.device_name != None
+            return cls.device_name is not None
 
 
 class FileContentMessage(BECMessage):
@@ -957,7 +958,7 @@ class GUIRegistryStateMessage(BECMessage):
 
     msg_type: ClassVar[str] = "gui_registry_state_message"
     state: dict[
-        str, dict[Literal["gui_id", "name", "widget_class", "config", "__rpc__"], str | dict | bool]
+        str, dict[Literal["gui_id", "name", "widget_class", "config", "__rpc__"], str | bool | dict]
     ]
 
 
