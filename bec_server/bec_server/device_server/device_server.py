@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 import ophyd
-from ophyd import DeviceStatus, Kind, OphydObject, Staged
+from ophyd import Kind, OphydObject, Staged, StatusBase
 from ophyd.utils import errors as ophyd_errors
 
 from bec_lib import messages
@@ -462,7 +462,7 @@ class DeviceServer(RPCMixin, BECService):
             status = obj.complete()
             if status is None:
                 raise InvalidDeviceError(
-                    f"The complete method of device {dev} does not return a DeviceStatus object."
+                    f"The complete method of device {dev} does not return a StatusBase object."
                 )
 
             status.__dict__["instruction"] = instr
@@ -512,9 +512,9 @@ class DeviceServer(RPCMixin, BECService):
                 status = obj.pre_scan()
             if status is None:
                 continue
-            if not isinstance(status, DeviceStatus):
+            if not isinstance(status, StatusBase):
                 raise ValueError(
-                    f"The pre_scan method of {dev} does not return a DeviceStatus object."
+                    f"The pre_scan method of {dev} does not return a StatusBase object."
                 )
 
             num_status_objects += 1
@@ -704,7 +704,7 @@ class DeviceServer(RPCMixin, BECService):
                 if obj._staged == Staged.yes:
                     logger.info(f"Device {obj.name} was already staged and will be first unstaged.")
                     status = self.device_manager.devices[dev].obj.unstage()
-                    if isinstance(status, DeviceStatus):
+                    if isinstance(status, StatusBase):
                         for ii in range(3):
                             try:
                                 status.wait(timeout=timeout_on_unstage)
@@ -721,9 +721,9 @@ class DeviceServer(RPCMixin, BECService):
                 status = self.device_manager.devices[dev].obj.stage()
                 if status is None or isinstance(status, list):
                     continue
-                if not isinstance(status, DeviceStatus):
+                if not isinstance(status, StatusBase):
                     raise ValueError(
-                        f"The stage method of {dev} does not return a DeviceStatus object."
+                        f"The stage method of {dev} does not return a StatusBase object."
                     )
                 num_status_objects += 1
                 status.__dict__["instruction"] = instr
@@ -734,7 +734,7 @@ class DeviceServer(RPCMixin, BECService):
 
         self.requests_handler.patch_num_status_objects(instr, num_status_objects)
 
-    def _device_staged_callback(self, status: DeviceStatus) -> None:
+    def _device_staged_callback(self, status: StatusBase) -> None:
         """Set the device status to staged"""
         obj = status.__dict__["obj"]
         dev_name = obj.name
@@ -768,9 +768,9 @@ class DeviceServer(RPCMixin, BECService):
                     logger.debug(f"Device {obj.name} was already unstaged.")
             if status is None or isinstance(status, list):
                 continue
-            if not isinstance(status, DeviceStatus):
+            if not isinstance(status, StatusBase):
                 raise ValueError(
-                    f"The unstage method of {dev} does not return a DeviceStatus object."
+                    f"The unstage method of {dev} does not return a StatusBase object."
                 )
             num_status_objects += 1
             status.__dict__["instruction"] = instr
