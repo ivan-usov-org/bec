@@ -120,7 +120,7 @@ class BECClient(BECService, UserScriptsMixin):
             return
         self.__init_params = {
             "config": config if config is not None else ServiceConfig(),
-            "connector_cls": connector_cls if connector_cls is not None else RedisConnector,
+            "connector_cls": (connector_cls if connector_cls is not None else RedisConnector),
             "wait_for_server": wait_for_server,
         }
         self._name = name
