@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.18.0 (2025-03-06)
+
+### Features
+
+- Add GUI registry state endpoing and message
+  ([`287fd84`](https://gitlab.psi.ch/bec/bec/-/commit/287fd84818b6854f3f6b4da2afa558e3a899f22f))
+
+### Testing
+
+- Add test for message & type hint improvements
+  ([`4902101`](https://gitlab.psi.ch/bec/bec/-/commit/4902101aabe6812b85f7ba0f97920970a4637121))
+
+
 ## v3.17.1 (2025-03-04)
 
 ### Bug Fixes
