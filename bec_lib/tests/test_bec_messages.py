@@ -395,3 +395,33 @@ def test_DeviceMonitor1DMessage():
         messages.DeviceMonitor1DMessage(
             device="eiger", data=np.random.rand(2, 3), metadata={"RID": "1234"}
         )
+
+
+def test_GUIRegistryStateMessage():
+    msg = messages.GUIRegistryStateMessage(
+        state={
+            "my_dock_area": {
+                "gui_id": "test_id",
+                "name": "test_name",
+                "config": {},
+                "widget_class": "test_class",
+                "__rpc__": True,
+            }
+        }
+    )
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+    assert res_loaded.metadata == {}
+
+    with pytest.raises(pydantic.ValidationError):
+        messages.GUIRegistryStateMessage(
+            state={
+                "my_dock_area": {
+                    "gui_id": "test_id",
+                    "name": "test_name",
+                    "config": None,
+                    "widget_class": "test_class",
+                }
+            }
+        )

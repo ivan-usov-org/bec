@@ -1329,3 +1329,23 @@ class MessageEndpoints:
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.StatusMessage, message_op=MessageOp.SET
         )
+
+    @staticmethod
+    def gui_registry_state(gui_id: str):
+        """
+        Endpoint for GUI registry state. This endpoint is used to publish the GUI registry state
+        using a messages.GUIRegistryStateMessage message. This message has the current state of the
+        GUI registry, including all DockAreas, Docks and Widgets. It is a stream with a single message.
+
+        Args:
+            gui_id (str): GUI ID.
+        Returns:
+            EndpointInfo: Endpoint for GUI registry state.
+        """
+
+        endpoint = f"{EndpointType.USER}/gui/registry_state/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.GUIRegistryStateMessage,
+            message_op=MessageOp.STREAM,
+        )
