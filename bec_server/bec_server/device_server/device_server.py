@@ -57,6 +57,7 @@ class RequestHandler:
         self.parent = parent
         self.connector = parent.connector
         self._storage = {}
+        self._lock = threading.Lock()
 
     def add_request(
         self,
@@ -111,10 +112,7 @@ class RequestHandler:
             raise ValueError(f"Request with ID {instr_id} not found.")
         request_info["num_status_objects"] = num_status_objects
 
-        if num_status_objects == 0:
-            self.set_finished(instr_id, success=True)
-        elif num_status_objects == len(request_info["status_objects"]):
-            self._update_instruction(instr_id)
+        self._update_instruction(instr_id)
 
     def remove_request(self, instr_id: str):
         """
@@ -151,20 +149,22 @@ class RequestHandler:
             success(bool): Whether the instruction was successful. Defaults to None.
             error_message(str): The error message if the instruction failed. Defaults to None.
         """
-        request_info = self.get_request(instr_id)
-        if request_info is None:
-            return
-        if success is None:
-            if request_info["num_status_objects"] > 0:
-                success = all(
-                    status_obj.success for status_obj in self._storage[instr_id]["status_objects"]
-                )
-            else:
-                success = True
-        self.send_device_instruction_response(
-            instr_id, success, done=True, error_message=error_message, result=result
-        )
-        self.remove_request(instr_id)
+        with self._lock:
+            request_info = self.get_request(instr_id)
+            if request_info is None:
+                return
+            if success is None:
+                if request_info["num_status_objects"] > 0:
+                    success = all(
+                        status_obj.success
+                        for status_obj in self._storage[instr_id]["status_objects"]
+                    )
+                else:
+                    success = True
+            self.send_device_instruction_response(
+                instr_id, success, done=True, error_message=error_message, result=result
+            )
+            self.remove_request(instr_id)
 
     def on_status_object_update(self, status_obj: ophyd.StatusBase):
         """
