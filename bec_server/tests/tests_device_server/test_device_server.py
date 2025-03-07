@@ -1,3 +1,4 @@
+import threading
 from unittest import mock
 from unittest.mock import ANY
 
@@ -413,7 +414,7 @@ def test_complete_device(device_server_mock, instr):
     "instructions",
     [
         messages.DeviceInstructionMessage(
-            device="samx",
+            device="eiger",
             action="pre_scan",
             parameter={},
             metadata={"stream": "primary", "device_instr_id": "diid", "RID": "test"},
@@ -424,9 +425,34 @@ def test_complete_device(device_server_mock, instr):
 def test_handle_device_instructions_pre_scan(device_server_mock, instructions):
     device_server = device_server_mock
 
-    with mock.patch.object(device_server, "_pre_scan") as pre_scan_mock:
-        device_server.handle_device_instructions(instructions)
-        pre_scan_mock.assert_called_once_with(instructions)
+    finished_thread_event = threading.Event()
+
+    def finished_callback():
+        finished_thread_event.set()
+
+    status = DeviceStatus(device=device_server.device_manager.devices.eiger.obj)
+    status.add_callback(finished_callback)
+
+    with mock.patch.object(
+        device_server.device_manager.devices.eiger.obj, "pre_scan", return_value=status
+    ):
+        with mock.patch.object(
+            device_server.requests_handler, "send_device_instruction_response"
+        ) as send_response_mock:
+            device_server.handle_device_instructions(instructions)
+            request_info = device_server.requests_handler.get_request(instr_id="diid")
+            assert len(request_info["status_objects"]) == 1
+            assert id(status) == id(request_info["status_objects"][0])
+            assert status.done is False
+            assert send_response_mock.call_count == 1
+            assert send_response_mock.call_args == mock.call("diid", None, False)
+            status.set_finished()
+            finished_thread_event.wait()
+            assert status.done is True
+            assert send_response_mock.call_count == 2
+            assert send_response_mock.call_args == mock.call(
+                "diid", True, done=True, error_message=None, result=None
+            )
 
 
 @pytest.mark.parametrize(
