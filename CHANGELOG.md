@@ -1,6 +1,27 @@
 # CHANGELOG
 
 
+## v3.19.0 (2025-03-07)
+
+### Bug Fixes
+
+- **device_server**: Add thread safety to request handling with a lock
+  ([`42a9ef2`](https://gitlab.psi.ch/bec/bec/-/commit/42a9ef2c30591a824b2eca876e88545b0cd75431))
+
+### Features
+
+- Add option to receive DeviceStatus for pre_scan
+  ([`4746281`](https://gitlab.psi.ch/bec/bec/-/commit/4746281501ea47443bcba4b154ec4d2a64f209f3))
+
+### Refactoring
+
+- Opptimize status handling if no DeviceStatus is returned
+  ([`b900249`](https://gitlab.psi.ch/bec/bec/-/commit/b90024949091641913b825cce8c7e468d5d02f45))
+
+- Switch checks to ophyd.StatusBase instead of ophyd.DeviceStatus
+  ([`1ec2efe`](https://gitlab.psi.ch/bec/bec/-/commit/1ec2efe9216ec3b069e59846663d54c49b9174dc))
+
+
 ## v3.18.0 (2025-03-06)
 
 ### Features
