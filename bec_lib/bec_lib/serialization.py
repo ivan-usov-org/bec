@@ -446,11 +446,10 @@ class MsgpackSerialization(SerializationInterface):
                 except Exception:
                     pass
                 raise RuntimeError("Failed to decode BECMessage") from exception
-            else:
-                if isinstance(msg, BECMessage):
-                    if msg.msg_type == "bundle_message":
-                        return msg.messages
-                return msg
+            if isinstance(msg, BECMessage):
+                if msg.msg_type == "bundle_message":
+                    return msg.messages
+            return msg
 
     @staticmethod
     def dumps(msg, version=None) -> str:
