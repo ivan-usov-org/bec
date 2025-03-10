@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.20.0 (2025-03-10)
+
+### Features
+
+- **endpoints**: Add GUI ACL endpoint for credential exchange
+  ([`8e3618c`](https://gitlab.psi.ch/bec/bec/-/commit/8e3618ce04b78fc221cd29fd14caa468ab569dc2))
+
+### Testing
+
+- **async_writer**: Add data consistency test for fixed size slices
+  ([`c684e6b`](https://gitlab.psi.ch/bec/bec/-/commit/c684e6b827119008ce42a376fc5e2fa7a14291d2))
+
+
 ## v3.19.0 (2025-03-07)
 
 ### Bug Fixes
