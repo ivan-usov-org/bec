@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v3.21.0 (2025-03-10)
+
+### Bug Fixes
+
+- Coverage concurrency settings
+  ([`494df6c`](https://gitlab.psi.ch/bec/bec/-/commit/494df6cd968b8e2bd5c563d21c8e1ceebfb29687))
+
+### Features
+
+- Add procedure manager and worker
+  ([`f9c299a`](https://gitlab.psi.ch/bec/bec/-/commit/f9c299af38a3a94e54a36502f1aff6497494aefe))
+
+Adds the basic things needed for procedures: - add message and endpoint types: - rename
+  MessageOp.SET to MessageOp.KEY_VALUE - add MessageOp entries for set operations - add functions in
+  redis_connector: - to interact with clients - to interact with sets - add procedure infra: -
+  manager distributes request queue to workers - worker base class which times out when its queue is
+  empty for too long - simple runner for testing
+
+
 ## v3.20.0 (2025-03-10)
 
 ### Features
