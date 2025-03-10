@@ -1349,3 +1349,20 @@ class MessageEndpoints:
             message_type=messages.GUIRegistryStateMessage,
             message_op=MessageOp.STREAM,
         )
+
+    @staticmethod
+    def gui_acl(gui_id: str):
+        """
+        Endpoint for exchanging GUI ACL information. This endpoint is used by the CLI or GUI to exchange
+        updates on the required ACL user. It uses a messages.CredentialsMessage message.
+
+        Args:
+            gui_id (str): GUI ID.
+        Returns:
+            EndpointInfo: Endpoint for GUI ACL.
+        """
+
+        endpoint = f"{EndpointType.USER}/gui/acl/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.CredentialsMessage, message_op=MessageOp.SEND
+        )
