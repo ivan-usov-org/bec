@@ -105,6 +105,7 @@ class BECClient(BECService, UserScriptsMixin):
         forced=False,
         parent=None,
         name: str | None = None,
+        prompt_for_acl=False,
     ) -> None:
         """
         Initialize the BECClient
@@ -115,6 +116,7 @@ class BECClient(BECService, UserScriptsMixin):
             wait_for_server (bool, optional): Whether to wait for the server to be available before starting. Defaults to False.
             forced (bool, optional): Whether to force the initialization of a new client. Defaults to False.
             name (str, optional): The name of the client. Defaults to None.
+            prompt_for_acl (bool, optional): Whether to prompt for ACL. Defaults to False.
         """
         if self._initialized:
             return
@@ -122,6 +124,7 @@ class BECClient(BECService, UserScriptsMixin):
             "config": config if config is not None else ServiceConfig(),
             "connector_cls": connector_cls if connector_cls is not None else RedisConnector,
             "wait_for_server": wait_for_server,
+            "prompt_for_acl": prompt_for_acl,
         }
         self._name = name
         self.device_manager = None
@@ -141,6 +144,8 @@ class BECClient(BECService, UserScriptsMixin):
         self.callbacks = CallbackHandler()
         self._parent = parent if parent is not None else self
         self._initialized = True
+        self._username = ""
+        self._system_user = ""
 
     def __new__(cls, *args, forced=False, **kwargs):
         if forced or BECClient._client is None:
@@ -179,8 +184,13 @@ class BECClient(BECService, UserScriptsMixin):
             config = self.__init_params["config"]
             connector_cls = self.__init_params["connector_cls"]
             wait_for_server = self.__init_params["wait_for_server"]
+            prompt_for_acl = self.__init_params["prompt_for_acl"]
             super().__init__(
-                config, connector_cls, wait_for_server=wait_for_server, name=self._name
+                config,
+                connector_cls,
+                wait_for_server=wait_for_server,
+                name=self._name,
+                prompt_for_acl=prompt_for_acl,
             )
             builtins.bec = self._parent
             self._start_services()
@@ -197,7 +207,6 @@ class BECClient(BECService, UserScriptsMixin):
     def _start_services(self):
         self._load_scans()
         # self.logbook = LogbookConnector(self.connector)
-        self._update_username()
         self._start_device_manager()
         self._start_scan_queue()
         self._start_alarm_handler()
@@ -208,6 +217,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
         self.device_monitor = DeviceMonitorPlugin(self.connector)
+        self._update_username()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -276,7 +286,9 @@ class BECClient(BECService, UserScriptsMixin):
         self.callbacks.run(EventType.NAMESPACE_UPDATE, action="add", ns_objects=funcs)
 
     def _update_username(self):
-        self._username = getpass.getuser()
+        # pylint: disable=protected-access
+        self._username = self.connector._redis_conn.acl_whoami()
+        self._system_user = getpass.getuser()
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
