@@ -20,6 +20,7 @@ import tomli
 from rich.console import Console
 from rich.table import Table
 
+from bec_lib.acl_login import BECAccess
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.service_config import ServiceConfig
@@ -68,9 +69,11 @@ def parse_cmdline_args(parser=None):
         choices=["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"],
         help="redis log level (not set means 'same as --log-level')",
     )
+    parser.add_argument("--user", default=None, help="user name to use for the service.", type=str)
 
     args, extra_args = parser.parse_known_args()
 
+    # pylint: disable=protected-access
     bec_logger._stderr_log_level = (
         bec_logger.level.name if args.log_level is None else args.log_level
     )
@@ -82,10 +85,14 @@ def parse_cmdline_args(parser=None):
     )
 
     config_file = args.config
+    cli_args = vars(args)
+    user = cli_args.pop("user")
+    acl_config = {"username": user} if user else {}
+
     if config_file:
-        service_config = ServiceConfig(config_file, cmdline_args=vars(args))
+        service_config = ServiceConfig(config_file, cmdline_args=cli_args, acl=acl_config)
     else:
-        service_config = ServiceConfig(cmdline_args=vars(args))
+        service_config = ServiceConfig(cmdline_args=cli_args, acl=acl_config)
 
     return args, extra_args, service_config
 
@@ -98,12 +105,16 @@ class BECService:
         unique_service=False,
         wait_for_server=False,
         name: str | None = None,
+        prompt_for_acl=False,
     ) -> None:
         super().__init__()
         self._name = name if name else self.__class__.__name__
         self._import_config(config)
         self._connector_cls = connector_cls
         self.connector: RedisConnector = connector_cls(self.bootstrap_server)
+        self.acl = BECAccess(self.connector)
+        self.acl._auto_login(prompt_for_acl, self._service_config.config.get("acl"))
+
         self._unique_service = unique_service
         self.wait_for_server = wait_for_server
         self.__service_id = str(uuid.uuid4())
@@ -113,8 +124,8 @@ class BECService:
         self._service_info_event = threading.Event()
         self._metrics_emitter_thread = None
         self._metrics_emitter_event = threading.Event()
-        self._services_info = {}
-        self._services_metric = {}
+        self._services_info: dict[str, messages.StatusMessage] = {}
+        self._services_metric: dict[str, messages.ServiceMetricMessage] = {}
         self._initialize_logger()
         self._check_services()
         self._status = BECStatus.BUSY
@@ -174,7 +185,7 @@ class BECService:
             service_config=self._service_config.config["service_config"],
         )
 
-    def _update_existing_services(self):
+    def _update_existing_services(self) -> None:
         service_keys = self.connector.keys(MessageEndpoints.service_status("*"))
         if not service_keys:
             return
@@ -289,6 +300,7 @@ class BECService:
             msg = messages.ServiceMetricMessage(name=self._service_name, metrics=data)
             try:
                 self.connector.set_and_publish(MessageEndpoints.metrics(self._service_id), msg)
+            # pylint: disable=broad-except
             except Exception:
                 # exception is not explicitely specified,
                 # because it depends on the underlying connector
@@ -372,9 +384,14 @@ class BECService:
         self._update_existing_services()
         return self._services_info
 
-    def wait_for_service(self, name, status=None):
-        if status is None:
-            status = BECStatus.RUNNING
+    def wait_for_service(self, name, status: BECStatus = BECStatus.RUNNING):
+        """
+        Wait for a service to reach a certain status.
+
+        Args:
+            name (str): The name of the service.
+            status (BECStatus, optional): The status to wait for. Defaults to BECStatus.RUNNING.
+        """
         logger.info(f"Waiting for {name}.")
         while True:
             service_status_msg = self.service_status.get(name)
